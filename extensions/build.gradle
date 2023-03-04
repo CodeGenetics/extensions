@@ -33,16 +33,16 @@ android {
 
 dependencies {
 
-    implementation 'androidx.palette:palette-ktx:1.0.0'
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.fragment:fragment-ktx:1.4.1'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
-    implementation 'com.karumi:dexter:6.2.3'
+    api 'androidx.palette:palette-ktx:1.0.0'
+    api 'androidx.core:core-ktx:1.9.0'
+    api 'androidx.cardview:cardview:1.0.0'
+    api 'androidx.appcompat:appcompat:1.6.1'
+    api 'androidx.recyclerview:recyclerview:1.2.1'
+    api 'com.karumi:dexter:6.2.3'
 
     //Glide Image Loading
-    implementation 'com.github.bumptech.glide:glide:4.13.1'
-    implementation 'androidx.lifecycle:lifecycle-process:2.5.1'
+    api 'com.github.bumptech.glide:glide:4.13.1'
+    api 'androidx.lifecycle:lifecycle-process:2.5.1'
 }
 
 afterEvaluate {
@@ -53,7 +53,7 @@ afterEvaluate {
 
                 groupId = 'com.github.CodeGenetics'
                 artifactId = 'extensions'
-                version = '1.0.0'
+                version = '1.0.1'
             }
         }
     }
