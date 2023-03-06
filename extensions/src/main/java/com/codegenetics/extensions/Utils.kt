@@ -2,8 +2,10 @@ package com.codegenetics.extensions
 
 import android.app.ActivityManager
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
+import android.media.MediaMetadataRetriever
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -12,6 +14,8 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.util.Log
 import androidx.annotation.ChecksSdkIntAtLeast
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.ProcessLifecycleOwner
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -169,4 +173,74 @@ fun getAge(date: String): Int {
         --a
     }
     return a
+}
+
+fun getRandomString(): String {
+    val r = Random()
+    val i1 = r.nextInt(8000000) + 65
+    val AlphaNumericString = ("0123456789" + "abcdefghijklmnopqrstuvxyz")
+    val sb = java.lang.StringBuilder(i1)
+    for (i in 0..20) {
+
+        // generate a random number between
+        // 0 to AlphaNumericString variable length
+        val index = (AlphaNumericString.length * Math.random()).toInt()
+
+        // add Character one by one in end of sb
+        sb.append(
+            AlphaNumericString[index]
+        )
+    }
+    return "a_$sb"
+}
+
+fun getUuid(): String {
+    return UUID.randomUUID().toString()
+}
+fun getThumbnailFromVideoURL(videoPath: String?): Bitmap? {
+    try {
+        var bitmap: Bitmap? = null
+        var mediaMetadataRetriever: MediaMetadataRetriever? = null
+        try {
+            mediaMetadataRetriever = MediaMetadataRetriever()
+            mediaMetadataRetriever.setDataSource(
+                videoPath, HashMap()
+            )
+
+            bitmap = mediaMetadataRetriever.frameAtTime
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            throw Throwable(
+                "Exception in retriveVideoFrameFromVideo(String videoPath)" + e.message
+            )
+        } finally {
+            mediaMetadataRetriever?.release()
+        }
+        return bitmap
+    } catch (e: Exception) {
+
+    }
+    return null
+}
+
+fun getTimeDifference(oldTime: String, newTime: String): Int {
+    return try {
+        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.ENGLISH)
+        val oldDateString = formatter.format(Date(oldTime.toLong() * 1000L))
+        val newDateString = formatter.format(Date(newTime.toLong()))
+        val oldDate = formatter.parse(oldDateString)
+        val newDate = formatter.parse(newDateString)
+        val timeDiff = newDate.time - oldDate.time
+        (timeDiff / 1000).toString().toInt()
+    } catch (e: Exception) {
+      0
+    }
+}
+
+fun isAppVisible(): Boolean {
+    return ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
+}
+
+fun isAppKilled(): Boolean {
+    return ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.DESTROYED)
 }

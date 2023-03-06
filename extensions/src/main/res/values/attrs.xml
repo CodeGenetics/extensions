@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Declare custom theme attributes that allow changing which styles are
+         used for button bars depending on the API level.
+         ?android:attr/buttonBarStyle is new as of API 11 so this is
+         necessary to support previous API levels. -->
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr name="metaButtonBarStyle" format="reference" />
+        <attr name="metaButtonBarButtonStyle" format="reference" />
+    </declare-styleable>
+
+
+
+
+        <declare-styleable name="ReadMoreTextView">
+            <attr name="readMoreMaxLine" format="integer" />
+            <attr name="readMoreText" format="string|reference" />
+            <attr name="readMoreColor" format="color|reference" />
+        </declare-styleable>
+
+
+        <declare-styleable name="InlineImageTextView">
+            <attr name="inlineImgResourceId" format="integer"/>
+            <attr name="inlineImgIndexInText" format="integer"/>
+            <attr name="inlineImageVerticalAlign" format="enum">
+                <enum name="bottom" value="0"/>
+                <enum name="baseline" value="1"/>
+                <enum name="center" value="2"/>
+            </attr>
+        </declare-styleable>
+</resources>

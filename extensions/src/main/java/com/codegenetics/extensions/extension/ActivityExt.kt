@@ -1,16 +1,23 @@
 package com.codegenetics.extensions.extension
 
+import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.PowerManager
 import android.provider.Settings
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.View
 import android.view.ViewTreeObserver
 import android.view.WindowManager
+import android.widget.ProgressBar
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import com.codegenetics.extensions.lib.R
 
 /** return activity instance in callback
  * check if it is not finishing and destroyed*/
@@ -87,4 +94,44 @@ fun Activity.getNavHeight(): Int {
         })
     }
     return h
+}
+
+fun Activity.showProgressBar() {
+    try {
+        findViewById<ProgressBar>(R.id.pb)?.show()
+    } catch (e: Exception) {
+    }
+}
+
+fun Activity.hideProgressBar() {
+    try {
+        findViewById<ProgressBar>(R.id.pb)?.gone()
+    } catch (e: Exception) {
+    }
+}
+
+
+fun Activity.getScreenSize(): Pair<Int, Int> {
+    val displayMetrics = DisplayMetrics()
+    windowManager.defaultDisplay.getMetrics(displayMetrics)
+    return Pair(displayMetrics.widthPixels, displayMetrics.heightPixels)
+}
+
+fun Activity.turnOnScreen() {
+    try {
+        val pm = this.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val isScreenOn = pm.isScreenOn
+        if (!isScreenOn) {
+            @SuppressLint("InvalidWakeLockTag") val wl = pm.newWakeLock(
+                PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE,
+                "MyLock"
+            )
+            wl.acquire(20000)
+            @SuppressLint("InvalidWakeLockTag") val wl_cpu =
+                pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyCpuLock")
+            wl_cpu.acquire(20000)
+        }
+    } catch (ex: Exception) {
+        Log.e("TAG", "turnOnScreen: ", ex)
+    }
 }

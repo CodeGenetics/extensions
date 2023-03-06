@@ -5,7 +5,10 @@ import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.GradientDrawable
+import android.net.Uri
+import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.Animation
@@ -15,8 +18,11 @@ import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.AnimRes
 import androidx.annotation.ColorRes
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import com.codegenetics.extensions.delay
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 
 
 fun View.show() {
@@ -30,6 +36,7 @@ fun View.gone() {
 fun View.hide() {
     this.visibility = View.INVISIBLE
 }
+
 fun View.enable() {
     this.isEnabled = true
 }
@@ -90,7 +97,7 @@ fun View.animateViewEndlessSwing(
     animator.start()
 }
 
-fun View.hideWithAnimation(@AnimRes animationId: Int ,callback: () -> Unit) {
+fun View.hideWithAnimation(@AnimRes animationId: Int, callback: () -> Unit) {
     try {
         val animation = AnimationUtils.loadAnimation(context, animationId)
         animation.setAnimationListener(object : Animation.AnimationListener {
@@ -119,6 +126,7 @@ fun View.showKeyboard() {
         context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager?
     inputMethodManager?.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
 }
+
 fun View.backgroundColor(@ColorRes colorId: Int) {
     setBackgroundColor(ContextCompat.getColor(context, colorId))
 }
@@ -174,6 +182,7 @@ fun View.setHorizontalMargin(value: Int) {
     param.setMargins(value, 0, value, 0)
     this.layoutParams = param
 }
+
 /** change background but view should have
  * a selector background in xml
  * */
@@ -194,7 +203,7 @@ fun View.setOnclickWithInternetCheck(callback: (View) -> Unit) {
     }
 }
 
- fun View.rotate() {
+fun View.rotate() {
     val animator = ObjectAnimator.ofFloat(this, "rotation", 0f, 360f)
     animator?.duration = 3000
     animator?.repeatCount = ObjectAnimator.INFINITE
@@ -221,4 +230,27 @@ fun View.setOnclickWithInternetCheck(callback: (View) -> Unit) {
 
     animator?.start()
 
+}
+
+fun View.gotoSettingsWithSnackBar() {
+    Snackbar.make(
+        this,
+        "Above permission(s) needed. Please allow in your application settings.",
+        BaseTransientBottomBar.LENGTH_INDEFINITE
+    ).setAction("Settings") {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+        val uri = Uri.fromParts("package", context.packageName, null)
+        intent.data = uri
+        context.startActivity(intent)
+    }.show()
+}
+
+fun View.showSnackBar(msg: String) {
+    Snackbar.make(this, msg, BaseTransientBottomBar.LENGTH_LONG).show()
+}
+
+fun View.showSnackBar(@StringRes msg: Int) {
+    Snackbar.make(
+        this, msg, BaseTransientBottomBar.LENGTH_LONG
+    ).show()
 }

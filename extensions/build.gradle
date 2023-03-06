@@ -11,8 +11,8 @@ android {
     defaultConfig {
         minSdk 21
         targetSdk 33
-        versionCode 7
-        versionName "1.0.7"
+        versionCode 8
+        versionName "1.0.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -40,6 +40,7 @@ dependencies {
     api 'androidx.appcompat:appcompat:1.6.1'
     api 'androidx.recyclerview:recyclerview:1.2.1'
     api 'com.karumi:dexter:6.2.3'
+    api 'com.intuit.sdp:sdp-android:1.0.6'
 
     //Glide Image Loading
     api 'com.github.bumptech.glide:glide:4.13.1'
@@ -54,7 +55,7 @@ afterEvaluate {
 
                 groupId = 'com.github.CodeGenetics'
                 artifactId = 'extensions'
-                version = '1.0.7'
+                version = '1.0.8'
             }
         }
     }

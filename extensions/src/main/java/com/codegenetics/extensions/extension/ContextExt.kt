@@ -15,7 +15,6 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.*
 import android.provider.Settings
-import android.text.format.DateFormat
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.ColorInt
@@ -29,7 +28,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
+import com.bumptech.glide.request.transition.Transition
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
@@ -54,6 +55,23 @@ fun Context.toast(@StringRes id: Int) = toast(resources.getString(id))
 fun Context.isRTL(): Boolean {
     val config = resources.configuration
     return config.layoutDirection == View.LAYOUT_DIRECTION_RTL
+}
+
+fun Context?.isValidContext(): Boolean {
+    try {
+        if (this == null) {
+            return false
+        }
+        if (this is Activity) {
+            val activity = this
+            if (activity.isDestroyed || activity.isFinishing) {
+                return false
+            }
+        }
+        return true
+    } catch (e: Exception) {
+        return false
+    }
 }
 
 inline fun <reified T : Any> Context.openActivity(vararg params: Pair<String, Any?>) {
@@ -135,6 +153,7 @@ fun Context.getStringResourceByName(resName: String?): String {
         "loading.."
     }
 }
+
 /** Opens Email Intent
  * @param email recipient to whom email should send
  * @param appName for the title of email*/
@@ -151,6 +170,7 @@ fun Context.sendFeedback(email: String, appName: String = "") {
         ex.printStackTrace()
     }
 }
+
 /** Opens App in play store with package name
  * that you provide in params */
 fun Context.openPlayStore(packageName: String) {
@@ -300,6 +320,7 @@ fun Context.getDrawableByName(name: String): Drawable? {
         null
     }
 }
+
 /** @param listOf(Manifest.permission.POST_NOTIFICATIONS)*/
 fun Context.requestPermission(permission: Collection<String>, callback: (Boolean) -> Unit) {
     Dexter.withContext(this).withPermissions(permission)
@@ -320,6 +341,7 @@ fun Context.requestPermission(permission: Collection<String>, callback: (Boolean
             }
         }).check()
 }
+
 /** @return string contains Manufacturer-Model-Ram*/
 fun Context.getDeviceInfo(): String {
     return "(${Build.MANUFACTURER} ${Build.MODEL} ${Build.VERSION.SDK_INT}) - ${getMemoryStatusMegs().first}/${getMemoryStatusMegs().second}"
@@ -397,4 +419,187 @@ fun Context.preLoadImageWithGlide(urlList: List<Any>, callback: (Boolean) -> Uni
     } while (i == urlList.size)
 
 }
+
+fun Context.getDrawable(
+    url: String,
+    callback: (Drawable) -> Unit
+) {
+    try {
+        if (isValidContext()) {
+            Glide.with(this).load(url).listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    callback(resource!!)
+                    return true
+                }
+
+            }).preload()
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun Context.getDrawable(
+    url: String,
+    width: Int ,
+    height: Int,
+    callback: (Drawable) -> Unit
+) {
+    try {
+        if (isValidContext()) {
+            Glide.with(this).load(url).listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    callback(resource!!)
+                    return true
+                }
+
+            }).preload(width, height)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun Context.getBitmap(url: String, callback: (Bitmap) -> Unit) {
+    try {
+        Glide.with(this).load(url)
+            .listener(object : CustomTarget<Bitmap>(), RequestListener<Drawable> {
+
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    callback(resource)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {
+
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return true
+                }
+
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+
+
+            }).preload()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun Context.getBitmap(
+    url: String,
+    width: Int,
+    height: Int,
+    callback: (Bitmap) -> Unit
+) {
+    try {
+        Glide.with(this).load(url)
+            .listener(object : CustomTarget<Bitmap>(), RequestListener<Drawable> {
+
+                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                    callback(resource)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {
+
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return true
+                }
+
+                override fun onLoadFailed(
+                    e: GlideException?,
+                    model: Any?,
+                    target: Target<Drawable>?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    return false
+                }
+
+
+            }).preload(width, height)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun Context.getWindowSizePercentage(widthPercent: Double, heightPercent: Double): Pair<Int, Int> {
+    val width = (this.resources.displayMetrics.widthPixels * (widthPercent / 100)).toInt()
+    val height = (this.resources.displayMetrics.heightPixels * (heightPercent / 100)).toInt()
+    return Pair(width, height)
+}
+
+fun Context.getColorResource(@ColorRes colorId: Int): Int {
+    return ContextCompat.getColor(this, colorId)
+}
+
+/** open youtube link in Youtube App*/
+fun Context.handleYoutubeLink(deeplink: String?) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = Uri.parse(deeplink)
+        this.startActivity(intent)
+    } catch (ex: Exception) {
+    }
+}
+
+fun Context.openEmailIntent() {
+    try {
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+        startActivity(intent)
+    } catch (ex: Exception) {
+    }
+}
+
 

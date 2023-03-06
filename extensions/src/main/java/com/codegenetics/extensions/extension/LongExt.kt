@@ -23,3 +23,9 @@ fun Long.getReadableSize(): String {
     return ""
 
 }
+
+fun Long.milliSecondsToMinutes(): String {
+    val minutes = this / 60000
+    val seconds = this % 60000 / 1000
+    return minutes.toString() + ":" + if (seconds < 10) "0$seconds" else seconds
+}
