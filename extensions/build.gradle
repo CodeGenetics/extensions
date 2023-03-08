@@ -11,8 +11,8 @@ android {
     defaultConfig {
         minSdk 21
         targetSdk 33
-        versionCode 8
-        versionName "1.0.8"
+        versionCode 9
+        versionName "1.0.9"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -55,7 +55,7 @@ afterEvaluate {
 
                 groupId = 'com.github.CodeGenetics'
                 artifactId = 'extensions'
-                version = '1.0.8'
+                version = '1.0.9'
             }
         }
     }
