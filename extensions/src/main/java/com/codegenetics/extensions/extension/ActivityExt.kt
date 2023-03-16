@@ -6,15 +6,22 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import android.text.TextUtils.replace
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.WindowManager
+import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import androidx.annotation.ColorRes
+import androidx.annotation.IdRes
+import androidx.appcompat.app.ActionBar
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.codegenetics.extensions.lib.R
@@ -134,4 +141,72 @@ fun Activity.turnOnScreen() {
     } catch (ex: Exception) {
         Log.e("TAG", "turnOnScreen: ", ex)
     }
+}
+
+/**
+ * Extension method to set Status Bar Color and Status Bar Icon Color Type(dark/light)
+ */
+enum class StatusIconColorType {
+    Dark, Light
+}
+fun Activity.setStatusBarColor(color: Int, iconColorType: StatusIconColorType = StatusIconColorType.Light) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        this.window.apply {
+            clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+            statusBarColor = color
+            decorView.systemUiVisibility = when (iconColorType) {
+                StatusIconColorType.Dark -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                StatusIconColorType.Light -> 0
+            }
+        }
+    } else
+        this.window.statusBarColor = color
+}
+
+/**
+ * Extension method to provide hide keyboard for [Activity].
+ */
+fun Activity.hideSoftKeyboard() {
+    if (currentFocus != null) {
+        val inputMethodManager = getSystemService(Context
+            .INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+    }
+}
+
+/**
+ * The `fragment` is added to the container view with id `frameId`. The operation is
+ * performed by the `fragmentManager`.
+ */
+fun AppCompatActivity.replaceFragmentInActivity(fragment: Fragment, @IdRes frameId: Int) {
+    supportFragmentManager.transact {
+        replace(frameId, fragment)
+    }
+}
+
+/**
+ * The `fragment` is added to the container view with tag. The operation is
+ * performed by the `fragmentManager`.
+ */
+fun AppCompatActivity.addFragmentToActivity(fragment: Fragment, tag: String) {
+    supportFragmentManager.transact {
+        add(fragment, tag)
+    }
+}
+
+/**
+ * Setup actionbar
+ */
+fun AppCompatActivity.setupActionBar(@IdRes toolbarId: Int, action: ActionBar.() -> Unit) {
+    setSupportActionBar(findViewById(toolbarId))
+    supportActionBar?.run {
+        action()
+    }
+}
+
+/**
+ * Extension method to get ContentView for ViewGroup.
+ */
+fun Activity.getContentView(): ViewGroup {
+    return this.findViewById(android.R.id.content) as ViewGroup
 }

@@ -6,11 +6,15 @@ import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.animation.CycleInterpolator
@@ -18,23 +22,78 @@ import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.AnimRes
 import androidx.annotation.ColorRes
+import androidx.annotation.IdRes
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginBottom
+import androidx.core.view.marginLeft
+import androidx.core.view.marginRight
+import androidx.core.view.marginTop
+import androidx.databinding.DataBindingUtil
+import androidx.databinding.ViewDataBinding
 import com.codegenetics.extensions.delay
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 
 
-fun View.show() {
-    this.visibility = View.VISIBLE
+/**
+ * Show the view  (visibility = View.VISIBLE)
+ */
+fun View.show(): View {
+    if (visibility != View.VISIBLE) {
+        visibility = View.VISIBLE
+    }
+    return this
 }
+
 
 fun View.gone() {
     this.visibility = View.GONE
 }
 
-fun View.hide() {
-    this.visibility = View.INVISIBLE
+/**
+ * Remove the view (visibility = View.GONE)
+ */
+fun View.remove(): View {
+    if (visibility != View.GONE) {
+        visibility = View.GONE
+    }
+    return this
+}
+
+/**
+ * Hide the view. (visibility = View.INVISIBLE)
+ */
+fun View.hide(): View {
+    if (visibility != View.INVISIBLE) {
+        visibility = View.INVISIBLE
+    }
+    return this
+}
+
+/**
+ * Toggle a view's visibility
+ */
+fun View.toggleVisibility(): View {
+    visibility = if (visibility == View.VISIBLE) {
+        View.INVISIBLE
+    } else {
+        View.VISIBLE
+    }
+    return this
+}
+
+
+/**
+ * Toggle a view's visibility i.e visible or gone
+ */
+fun View.toggleRemove(): View {
+    visibility = if (visibility == View.VISIBLE) {
+        View.GONE
+    } else {
+        View.VISIBLE
+    }
+    return this
 }
 
 fun View.enable() {
@@ -147,41 +206,111 @@ fun View.setMargin(left: Int, right: Int, top: Int, bottom: Int) {
     this.layoutParams = param
 }
 
-fun View.setStartMargin(value: Int) {
-    val param = this.layoutParams as ViewGroup.MarginLayoutParams
-    param.setMargins(value, 0, 0, 0)
-    this.layoutParams = param
+fun View.setStartMargin(value: Int) = setMargin(value, marginRight, marginTop, marginBottom)
+
+fun View.setEndMargin(value: Int) = setMargin(marginLeft, value, marginTop, marginBottom)
+
+fun View.setBottomMargin(value: Int) = setMargin(marginLeft, marginRight, marginTop, value)
+
+fun View.setTopMargin(value: Int) = setMargin(marginLeft, marginRight, value, marginBottom)
+
+fun View.setVerticalMargin(value: Int) = setMargin(marginLeft, marginRight, value, value)
+
+fun View.setHorizontalMargin(value: Int) = setMargin(value, value, marginTop, marginBottom)
+
+/**
+ * Extension method to set View's left padding.
+ */
+fun View.setPaddingLeft(value: Int) = setPadding(value, paddingTop, paddingRight, paddingBottom)
+
+/**
+ * Extension method to set View's right padding.
+ */
+fun View.setPaddingRight(value: Int) = setPadding(paddingLeft, paddingTop, value, paddingBottom)
+
+/**
+ * Extension method to set View's top padding.
+ */
+fun View.setPaddingTop(value: Int) =
+    setPaddingRelative(paddingStart, value, paddingEnd, paddingBottom)
+
+/**
+ * Extension method to set View's bottom padding.
+ */
+fun View.setPaddingBottom(value: Int) =
+    setPaddingRelative(paddingStart, paddingTop, paddingEnd, value)
+
+/**
+ * Extension method to set View's start padding.
+ */
+fun View.setPaddingStart(value: Int) =
+    setPaddingRelative(value, paddingTop, paddingEnd, paddingBottom)
+
+/**
+ * Extension method to set View's end padding.
+ */
+fun View.setPaddingEnd(value: Int) =
+    setPaddingRelative(paddingStart, paddingTop, value, paddingBottom)
+
+/**
+ * Extension method to set View's horizontal padding.
+ */
+fun View.setPaddingHorizontal(value: Int) =
+    setPaddingRelative(value, paddingTop, value, paddingBottom)
+
+/**
+ * Extension method to set View's vertical padding.
+ */
+fun View.setPaddingVertical(value: Int) = setPaddingRelative(paddingStart, value, paddingEnd, value)
+
+/**
+ * Extension method to set View's height.
+ */
+fun View.setHeight(value: Int) {
+    val lp = layoutParams
+    lp?.let {
+        lp.height = value
+        layoutParams = lp
+    }
 }
 
-fun View.setEndMargin(value: Int) {
-    val param = this.layoutParams as ViewGroup.MarginLayoutParams
-    param.setMargins(0, 0, value, 0)
-    this.layoutParams = param
+/**
+ * Extension method to set View's width.
+ */
+fun View.setWidth(value: Int) {
+    val lp = layoutParams
+    lp?.let {
+        lp.width = value
+        layoutParams = lp
+    }
 }
 
-fun View.setBottomMargin(value: Int) {
-    val param = this.layoutParams as ViewGroup.MarginLayoutParams
-    param.setMargins(0, 0, 0, value)
-    this.layoutParams = param
+/**
+ * Extension method to resize View with height & width.
+ */
+fun View.resize(width: Int, height: Int) {
+    val lp = layoutParams
+    lp?.let {
+        lp.width = width
+        lp.height = height
+        layoutParams = lp
+    }
 }
 
-fun View.setTopMargin(value: Int) {
-    val param = this.layoutParams as ViewGroup.MarginLayoutParams
-    param.setMargins(0, value, 0, 0)
-    this.layoutParams = param
+
+/**
+ * Extension method to update padding of view.
+ *
+ */
+fun View.updatePadding(
+    paddingStart: Int = getPaddingStart(),
+    paddingTop: Int = getPaddingTop(),
+    paddingEnd: Int = getPaddingEnd(),
+    paddingBottom: Int = getPaddingBottom()
+) {
+    setPaddingRelative(paddingStart, paddingTop, paddingEnd, paddingBottom)
 }
 
-fun View.setVerticalMargin(value: Int) {
-    val param = this.layoutParams as ViewGroup.MarginLayoutParams
-    param.setMargins(0, value, 0, value)
-    this.layoutParams = param
-}
-
-fun View.setHorizontalMargin(value: Int) {
-    val param = this.layoutParams as ViewGroup.MarginLayoutParams
-    param.setMargins(value, 0, value, 0)
-    this.layoutParams = param
-}
 
 /** change background but view should have
  * a selector background in xml
@@ -245,6 +374,13 @@ fun View.gotoSettingsWithSnackBar() {
     }.show()
 }
 
+/**
+ * Transforms static java function Snackbar.make() to an extension function on View.
+ */
+fun View.showSnackBar(snackbarText: String, timeLength: Int) {
+    Snackbar.make(this, snackbarText, timeLength).show()
+}
+
 fun View.showSnackBar(msg: String) {
     Snackbar.make(this, msg, BaseTransientBottomBar.LENGTH_LONG).show()
 }
@@ -254,3 +390,174 @@ fun View.showSnackBar(@StringRes msg: Int) {
         this, msg, BaseTransientBottomBar.LENGTH_LONG
     ).show()
 }
+
+/**
+ * Extension method to provide simpler access to {@link View#getResources()#getString(int)}.
+ */
+fun View.getString(stringResId: Int): String = resources.getString(stringResId)
+
+/**
+ * Extension method to remove the required boilerplate for running code after a view has been
+ * inflated and measured.
+ *
+ * @author Antonio Leiva
+ * @see <a href="https://antonioleiva.com/kotlin-ongloballayoutlistener/>Kotlin recipes: OnGlobalLayoutListener</a>
+ */
+inline fun <T : View> T.afterMeasured(crossinline f: T.() -> Unit) {
+    viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        override fun onGlobalLayout() {
+            if (measuredWidth > 0 && measuredHeight > 0) {
+                viewTreeObserver.removeOnGlobalLayoutListener(this)
+                f()
+            }
+        }
+    })
+}
+
+/**
+ * Extension method to get ClickableSpan.
+ * e.g.
+ * val loginLink = getClickableSpan(context.getColorCompat(R.color.colorAccent), { })
+ */
+fun View.doOnLayout(onLayout: (View) -> Boolean) {
+    addOnLayoutChangeListener(object : View.OnLayoutChangeListener {
+        override fun onLayoutChange(
+            view: View, left: Int, top: Int, right: Int, bottom: Int,
+            oldLeft: Int, oldTop: Int, oldRight: Int, oldBottom: Int
+        ) {
+            if (onLayout(view)) {
+                view.removeOnLayoutChangeListener(this)
+            }
+        }
+    })
+}
+
+/**
+ * Extension method to simplify view binding.
+ */
+fun <T : ViewDataBinding> View.bind() = DataBindingUtil.bind<T>(this) as T
+
+/**
+ * Set an onclick listener
+ */
+fun <T : View> T.click(block: (T) -> Unit) = setOnClickListener { block(it as T) }
+
+/**
+ * Extension method to set OnClickListener on a view.
+ */
+fun <T : View> T.longClick(block: (T) -> Boolean) = setOnLongClickListener { block(it as T) }
+
+/**
+ * Extension method to get a view as bitmap.
+ */
+fun View.getBitmap(): Bitmap {
+    val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bmp)
+    draw(canvas)
+    canvas.save()
+    return bmp
+}
+
+/**
+ * Show a snackbar with [message]
+ */
+fun View.snack(message: String, length: Int = BaseTransientBottomBar.LENGTH_LONG) =
+    snack(message, length) {}
+
+/**
+ * Show a snackbar with [messageRes]
+ */
+fun View.snack(@StringRes messageRes: Int, length: Int = BaseTransientBottomBar.LENGTH_LONG) =
+    snack(messageRes, length) {}
+
+/**
+ * Show a snackbar with [message], execute [f] and show it
+ */
+inline fun View.snack(
+    message: String,
+    @Snackbar.Duration length: Int = BaseTransientBottomBar.LENGTH_LONG,
+    f: Snackbar.() -> Unit
+) {
+    val snack = Snackbar.make(this, message, length)
+    snack.f()
+    snack.show()
+}
+
+/**
+ * Show a snackbar with [messageRes], execute [f] and show it
+ */
+inline fun View.snack(
+    @StringRes messageRes: Int,
+    @Snackbar.Duration length: Int = BaseTransientBottomBar.LENGTH_LONG,
+    f: Snackbar.() -> Unit
+) {
+    val snack = Snackbar.make(this, messageRes, length)
+    snack.f()
+    snack.show()
+}
+
+/**
+ * Find a parent of type [parentType], assuming it exists
+ */
+tailrec fun <T : View> View.findParent(parentType: Class<T>): T {
+    return if (parent.javaClass == parentType) parent as T else (parent as View).findParent(
+        parentType
+    )
+}
+
+/**
+ * Like findViewById but with type interference, assume the view exists
+ */
+inline fun <reified T : View> View.find(@IdRes id: Int): T = findViewById<T>(id)
+
+/**
+ *  Like findViewById but with type interference, or null if not found
+ */
+inline fun <reified T : View> View.findOptional(@IdRes id: Int): T? = findViewById(id) as? T
+
+/**
+ * Extension method to inflate layout for ViewGroup.
+ */
+fun ViewGroup.inflate(layoutRes: Int): View {
+    return LayoutInflater.from(context).inflate(layoutRes, this, false)
+}
+
+/**
+ * Extension method to get views by tag for ViewGroup.
+ */
+fun ViewGroup.getViewsByTag(tag: String): ArrayList<View> {
+    val views = ArrayList<View>()
+    val childCount = childCount
+    for (i in 0..childCount - 1) {
+        val child = getChildAt(i)
+        if (child is ViewGroup) {
+            views.addAll(child.getViewsByTag(tag))
+        }
+
+        val tagObj = child.tag
+        if (tagObj != null && tagObj == tag) {
+            views.add(child)
+        }
+
+    }
+    return views
+}
+
+/**
+ * Extension method to remove views by tag ViewGroup.
+ */
+fun ViewGroup.removeViewsByTag(tag: String) {
+    for (i in 0..childCount - 1) {
+        val child = getChildAt(i)
+        if (child is ViewGroup) {
+            child.removeViewsByTag(tag)
+        }
+
+        if (child.tag == tag) {
+            removeView(child)
+        }
+    }
+}
+
+
+

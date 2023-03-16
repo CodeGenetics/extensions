@@ -4,6 +4,7 @@ import android.graphics.Color
 import androidx.core.text.HtmlCompat
 import org.json.JSONObject
 import java.text.NumberFormat
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -205,4 +206,18 @@ fun String.parseDouble(): Double {
     } catch (e: Exception) {
         return 0.0
     }
+}
+
+/**
+ * Extension method to get Date for String with specified format.
+ */
+fun String.dateInFormat(format: String): Date? {
+    val dateFormat = SimpleDateFormat(format, Locale.getDefault())
+    var parsedDate: Date? = null
+    try {
+        parsedDate = dateFormat.parse(this)
+    } catch (ignored: ParseException) {
+        ignored.printStackTrace()
+    }
+    return parsedDate
 }
