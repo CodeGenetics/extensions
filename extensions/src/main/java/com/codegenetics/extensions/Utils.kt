@@ -1,7 +1,5 @@
 package com.codegenetics.extensions
 
-import android.app.ActivityManager
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
@@ -14,11 +12,17 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.util.Log
 import androidx.annotation.ChecksSdkIntAtLeast
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 import java.text.SimpleDateFormat
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.concurrent.TimeUnit
+import kotlin.math.abs
 
 fun delay(time: Long = 500L, runnable: Runnable): Handler {
     val handler = Handler(Looper.getMainLooper())
@@ -197,6 +201,7 @@ fun getRandomString(): String {
 fun getUuid(): String {
     return UUID.randomUUID().toString()
 }
+
 fun getThumbnailFromVideoURL(videoPath: String?): Bitmap? {
     try {
         var bitmap: Bitmap? = null
@@ -223,19 +228,7 @@ fun getThumbnailFromVideoURL(videoPath: String?): Bitmap? {
     return null
 }
 
-fun getTimeDifference(oldTime: String, newTime: String): Int {
-    return try {
-        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss Z", Locale.ENGLISH)
-        val oldDateString = formatter.format(Date(oldTime.toLong() * 1000L))
-        val newDateString = formatter.format(Date(newTime.toLong()))
-        val oldDate = formatter.parse(oldDateString)
-        val newDate = formatter.parse(newDateString)
-        val timeDiff = newDate.time - oldDate.time
-        (timeDiff / 1000).toString().toInt()
-    } catch (e: Exception) {
-      0
-    }
-}
+
 
 fun isAppVisible(): Boolean {
     return ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
@@ -243,4 +236,106 @@ fun isAppVisible(): Boolean {
 
 fun isAppKilled(): Boolean {
     return ProcessLifecycleOwner.get().lifecycle.currentState.isAtLeast(Lifecycle.State.DESTROYED)
+}
+
+
+fun getDateFormat(dateString: String): String? {
+    val possibleFormats = arrayOf(
+        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+        "yyyy-MM-dd'T'HH:mm:ss.SSSZ",
+        "yyyy-MM-dd'T'HH:mm:ss.SSS",
+        "yyyy-MM-dd'T'HH:mm:ssZ",
+        "yyyy-MM-dd'T'HH:mm:ss",
+        "yyyy-MM-dd HH:mm:ss.SSS",
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy/MM/dd HH:mm:ss.SSS",
+        "yyyy/MM/dd HH:mm:ss",
+        "EEE MMM dd HH:mm:ss z yyyy",
+    )
+    for (format in possibleFormats) {
+        try {
+            SimpleDateFormat(format, Locale.getDefault()).parse(dateString)
+            return format
+        } catch (e: Exception) {
+            // Parsing failed for this format, try the next one
+        }
+    }
+    // Parsing failed for all possible formats
+    return null
+}
+
+/** @return Boolean time from current time*/
+fun isTimeElapsed(dateString: String, timeInSeconds: Long): Boolean {
+    if (dateString.isEmpty()) return false
+    val dateFormat = SimpleDateFormat(getDateFormat(dateString), Locale.getDefault())
+    dateFormat.timeZone = TimeZone.getDefault()
+
+    val parsedTime = dateFormat.parse(dateString)
+
+    val date = dateFormat.parse(dateString)
+    return if (date != null) {
+        val currentTime = Date()
+        val currentUtcTime = Date(currentTime.time - TimeZone.getDefault().rawOffset)
+        // Calculate the duration between the input time and the current time
+        val diffInMilliSec = abs(currentUtcTime.time - (parsedTime?.time ?: Date().time))
+        diffInMilliSec >= (timeInSeconds * 1000)
+    } else false
+}
+
+/** @return the time difference in minutes from Current time */
+fun getTimeElapsedSince(inputTime: String): Long {
+    if (inputTime.isEmpty()) return 0
+    return try {// Parse the input time string into a Date object
+        val dateFormat = SimpleDateFormat(getDateFormat(inputTime), Locale.getDefault())
+        dateFormat.timeZone = TimeZone.getDefault()
+        val parsedTime = dateFormat.parse(inputTime)
+        // Get the current time as a Date object in UTC time zone
+        val currentTime = Date()
+        val currentUtcTime = Date(currentTime.time - TimeZone.getDefault().rawOffset)
+        // Calculate the duration between the input time and the current time
+        val durationInMillis = abs(currentUtcTime.time - (parsedTime?.time ?: Date().time))
+
+        // Return the elapsed time in minutes
+        durationInMillis / (1000)
+    } catch (e: Exception) {
+        0
+    }
+}
+
+
+/** @return the time difference in minutes from Current time
+ * Required API Level 26*/
+@RequiresApi(Build.VERSION_CODES.O)
+fun getTimeElapsedSinceO(inputTime: String): Long {
+    // Parse the input time string into a LocalDateTime object
+    val formatter = DateTimeFormatter.ofPattern(getDateFormat(inputTime))
+    val parsedTime = LocalDateTime.parse(inputTime, formatter)
+
+    // Convert the input time to UTC
+    val utcTime = parsedTime.atOffset(ZoneOffset.UTC)
+
+    // Get the current time as a LocalDateTime object in UTC
+    val currentUtcTime = LocalDateTime.now(ZoneOffset.UTC)
+
+    // Calculate the duration between the input time and the current time
+    val duration = Duration.between(utcTime, currentUtcTime)
+
+    // Return the elapsed time in minutes
+    return duration.toMinutes()
+}
+
+fun getTimeDifference(oldTime: String, newTime: String): Long {
+    return try {
+        val oldDateFormatter = SimpleDateFormat(getDateFormat(oldTime), Locale.getDefault())
+        oldDateFormatter.timeZone = TimeZone.getDefault()
+        val newDateFormatter = SimpleDateFormat(getDateFormat(newTime), Locale.getDefault())
+        newDateFormatter.timeZone = TimeZone.getDefault()
+
+        val oldDate = oldDateFormatter.parse(oldTime)
+        val newDate = newDateFormatter.parse(newTime)
+        val timeDiff = abs((newDate?.time ?: Date().time) - (oldDate?.time ?: Date().time))
+        (timeDiff / 1000).toString().toLong()
+    } catch (e: Exception) {
+        0
+    }
 }
