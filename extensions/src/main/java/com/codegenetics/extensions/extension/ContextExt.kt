@@ -16,6 +16,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
+import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
@@ -897,4 +898,28 @@ fun Context.isDarkTheme(): Boolean =
  */
 fun Context.bluetoothManager(): BluetoothManager {
     return getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+}
+
+fun Context.locationManager(): LocationManager {
+    return this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+}
+/** Check if System's Location os On/Off*/
+fun Context.isLocationEnabled(): Boolean {
+    return locationManager().isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager().isProviderEnabled(
+        LocationManager.NETWORK_PROVIDER
+    )
+}
+
+/** Navigate to Setting screen*/
+fun Context.navigateToLocationSettings() {
+    val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    startActivity(intent)
+}
+
+fun Context.isPermissionGranted(permission: String): Boolean {
+    return ContextCompat.checkSelfPermission(
+        this,
+        permission
+    ) == PackageManager.PERMISSION_GRANTED
 }

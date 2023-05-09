@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:background="@drawable/dialog_layout"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/_20sdp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTitle"
+            style="@style/AppTextView.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/_7sdp"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textSize="@dimen/_14ssp"
+            tools:text="title" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvMessage"
+            style="@style/AppTextView.Regular"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/_10sdp"
+            android:padding="@dimen/_7sdp"
+            android:gravity="center"
+            android:textAlignment="center"
+            android:textSize="@dimen/_12ssp"
+            tools:text="Hello world !!!" />
+
+
+        <RelativeLayout
+            android:id="@+id/btns_view"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/_30sdp">
+
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnLeft"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_marginStart="@dimen/_10sdp"
+                android:background="@color/transparent"
+                android:fontFamily="@font/euclidcirculara_medium"
+                android:gravity="center"
+                android:textAllCaps="false"
+                android:textColor="@color/grey_40"
+                android:textSize="@dimen/_11ssp"
+                tools:text="Positive" />
+
+            <View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:layout_marginVertical="@dimen/_5sdp"
+                android:background="#FFE3E4E6" />
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnRight"
+                style="@style/AppTextView.Regular"
+                android:layout_width="@dimen/_100sdp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentBottom="true"
+                android:layout_marginEnd="@dimen/_10ssp"
+                android:background="@color/transparent"
+                android:fontFamily="@font/euclidcirculara_medium"
+                android:gravity="center"
+                android:textAllCaps="false"
+                android:textColor="@color/grey_40"
+                android:textSize="@dimen/_11ssp"
+                tools:text="Negative" />
+
+        </RelativeLayout>
+    </LinearLayout>
+
+
+
+
+</RelativeLayout>
