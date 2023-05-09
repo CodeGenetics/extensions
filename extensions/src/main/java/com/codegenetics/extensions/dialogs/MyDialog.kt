@@ -11,9 +11,6 @@ import androidx.annotation.DrawableRes
 import com.codegenetics.extensions.extension.*
 import com.codegenetics.extensions.lib.R
 import com.codegenetics.extensions.lib.databinding.*
-
-object MyDialog {
-
     fun Activity.showTwoButtonDialog(
         title: String = "",
         msg: String,
@@ -270,4 +267,3 @@ object MyDialog {
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
     }
 
-}
