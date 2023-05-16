@@ -221,3 +221,19 @@ fun String.dateInFormat(format: String): Date? {
     }
     return parsedDate
 }
+
+fun String.toSnakeCase(): String {
+    // Replace all non-alphanumeric characters with underscores
+    val regex = Regex("[^a-zA-Z0-9]")
+    val result = regex.replace(this, "_")
+    // Convert to lowercase and separate words with underscores
+    return result.lowercase()
+}
+
+fun String.toCamelCaseWithSpaces(): String {
+    // Replace all non-alphabetic characters with spaces
+    val regex = Regex("[^a-zA-Z]")
+    val result = regex.replace(this, " ")
+    // Capitalize the first character of each word
+    return result.split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+}

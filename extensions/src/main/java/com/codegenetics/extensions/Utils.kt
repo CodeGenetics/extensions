@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.media.MediaMetadataRetriever
 import android.os.Build
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.text.Html
@@ -15,6 +16,7 @@ import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.annotation.RequiresApi
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
+import kotlinx.coroutines.NonCancellable.start
 import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.LocalDateTime
@@ -337,5 +339,24 @@ fun getTimeDifference(oldTime: String, newTime: String): Long {
         (timeDiff / 1000).toString().toLong()
     } catch (e: Exception) {
         0
+    }
+}
+
+fun startTimer(
+    durationSeconds: Long,
+    tickInterval: Long = 1000,
+    onTick: (Long) -> Unit,
+    onFinish: () -> Unit
+): CountDownTimer {
+    return object : CountDownTimer(durationSeconds * 1000, tickInterval) {
+        override fun onTick(millisUntilFinished: Long) {
+            onTick(millisUntilFinished / 1000)
+        }
+
+        override fun onFinish() {
+            onFinish()
+        }
+    }.apply {
+        start()
     }
 }
