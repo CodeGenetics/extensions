@@ -15,8 +15,8 @@ android {
     defaultConfig {
         minSdk 21
         targetSdk 33
-        versionCode 17
-        versionName "1.1.7"
+        versionCode 20
+        versionName "2.0.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -46,6 +46,8 @@ dependencies {
     api 'com.karumi:dexter:6.2.3'
     api 'com.intuit.sdp:sdp-android:1.0.6'
     api 'com.intuit.ssp:ssp-android:1.0.6'
+    api 'com.esotericsoftware:kryo:4.0.1'
+    api 'de.javakaffee:kryo-serializers:0.40'
 
 
     //Glide Image Loading
@@ -62,7 +64,7 @@ afterEvaluate {
 
                 groupId = 'com.github.CodeGenetics'
                 artifactId = 'extensions'
-                version = '1.1.7'
+                version = '2.0.0'
             }
         }
     }
