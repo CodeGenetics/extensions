@@ -767,15 +767,37 @@ fun Context.areNotificationsEnabled(): Boolean {
 }
 /**
  * Extension method to navigate user to Notification settings for Context.
+ * for Android 11 or above add following in Manifest
+ *   <queries>
+ *         <intent>
+ *             <action android:name="android.settings.APP_NOTIFICATION_SETTINGS" />
+ *         </intent>
+ *     </queries>
  */
 fun Context.navigateToNotificationSettings() {
-    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-    startActivity(intent)
+    val intent = Intent()
+    when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
+            intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
+            intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+        }
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
+            intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+            intent.addCategory(Intent.CATEGORY_DEFAULT)
+            intent.data = android.net.Uri.parse("package:$packageName")
+        }
+        else -> {
+            intent.action = Settings.ACTION_APPLICATION_SETTINGS
+        }
+    }
+    if (intent.resolveActivity(packageManager) != null) {
+        startActivity(intent)
+    } else {
+        intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+        intent.data = android.net.Uri.fromParts("package", packageName, null)
+        startActivity(intent)
+    }
 }
-
-
-
 
 /**
  * Extension method to get keyguardManager for Context.
