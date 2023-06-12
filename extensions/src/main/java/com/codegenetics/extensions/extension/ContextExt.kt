@@ -144,7 +144,7 @@ fun fillIntentArguments(intent: Intent, params: Array<out Pair<String, Any?>>) {
 }
 
 fun Context.isInternetConnected(): Boolean {
-    val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
 
     // For 29 api or above
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -182,13 +182,13 @@ fun Context.getStringResourceByName(resName: String?): String {
  * @param appName for the title of email*/
 fun Context.sendFeedback(email: String, appName: String = "") {
     try {
-        val intent = Intent(Intent.ACTION_SEND)
+        val intent = Intent(ACTION_SEND)
         val recipients = arrayOf(email)
-        intent.putExtra(Intent.EXTRA_EMAIL, recipients)
-        intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback: ${appName}")
+        intent.putExtra(EXTRA_EMAIL, recipients)
+        intent.putExtra(EXTRA_SUBJECT, "Feedback: ${appName}")
         intent.type = "text/plain"
         intent.setPackage("com.google.android.gm")
-        startActivity(Intent.createChooser(intent, "Send mail"))
+        startActivity(createChooser(intent, "Send mail"))
     } catch (ex: Exception) {
         ex.printStackTrace()
     }
@@ -199,7 +199,7 @@ fun Context.sendFeedback(email: String, appName: String = "") {
 fun Context.openPlayStore(packageName: String) {
     try {
         val uri = Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
-        val intent = Intent(Intent.ACTION_VIEW, uri)
+        val intent = Intent(ACTION_VIEW, uri)
         startActivity(intent)
     } catch (ex: Exception) {
         ex.printStackTrace()
@@ -211,8 +211,8 @@ fun Context.openPlayStore(packageName: String) {
 fun Context.openBrowser(url: String) {
     try {
         val intent = Intent()
-        intent.action = Intent.ACTION_VIEW
-        intent.addCategory(Intent.CATEGORY_BROWSABLE)
+        intent.action = ACTION_VIEW
+        intent.addCategory(CATEGORY_BROWSABLE)
         intent.data = Uri.parse(url)
         startActivity(intent)
     } catch (e: ActivityNotFoundException) {
@@ -233,7 +233,7 @@ fun Context.color(@ColorRes res: Int): Int {
  * default msg will be empty*/
 fun Context.shareFile(filePath: String, msg: String = "") {
     val file = File(filePath)
-    val share = Intent(Intent.ACTION_SEND)
+    val share = Intent(ACTION_SEND)
     share.type = "*/*"
     val pdfUri: Uri?
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -241,11 +241,11 @@ fun Context.shareFile(filePath: String, msg: String = "") {
     } else {
         pdfUri = Uri.fromFile(file)
     }
-    share.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    share.addFlags(FLAG_GRANT_READ_URI_PERMISSION)
 
-    share.putExtra(Intent.EXTRA_TEXT, msg)
-    share.putExtra(Intent.EXTRA_STREAM, pdfUri)
-    startActivity(Intent.createChooser(share, "Share"))
+    share.putExtra(EXTRA_TEXT, msg)
+    share.putExtra(EXTRA_STREAM, pdfUri)
+    startActivity(createChooser(share, "Share"))
 }
 
 @SuppressLint("HardwareIds")
@@ -261,13 +261,13 @@ fun Context.openStore(storeName: String) {
     try {
         startActivity(
             Intent(
-                Intent.ACTION_VIEW, Uri.parse("market://search?q=pub:$storeName")
+                ACTION_VIEW, Uri.parse("market://search?q=pub:$storeName")
             )
         )
     } catch (exception: ActivityNotFoundException) {
         startActivity(
             Intent(
-                Intent.ACTION_VIEW,
+                ACTION_VIEW,
                 Uri.parse("http://play.google.com/store/search?q=pub:$storeName")
             )
         )
@@ -373,7 +373,7 @@ fun Context.getDeviceInfo(): String {
 
 fun Context.getMemoryStatusMegs(): Pair<String, String> {
     val mi = ActivityManager.MemoryInfo()
-    val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager?
+    val activityManager = getSystemService(ACTIVITY_SERVICE) as ActivityManager?
     activityManager!!.getMemoryInfo(mi)
 
     val availableMegs = mi.availMem / 1048576L
@@ -609,7 +609,7 @@ fun Context.getColorResource(@ColorRes colorId: Int): Int {
 /** open youtube link in Youtube App*/
 fun Context.handleYoutubeLink(deeplink: String?) {
     try {
-        val intent = Intent(Intent.ACTION_VIEW)
+        val intent = Intent(ACTION_VIEW)
         intent.data = Uri.parse(deeplink)
         this.startActivity(intent)
     } catch (ex: Exception) {
@@ -618,8 +618,8 @@ fun Context.handleYoutubeLink(deeplink: String?) {
 
 fun Context.openEmailIntent() {
     try {
-        val intent = Intent(Intent.ACTION_MAIN)
-        intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+        val intent = Intent(ACTION_MAIN)
+        intent.addCategory(CATEGORY_APP_EMAIL)
         startActivity(intent)
     } catch (ex: Exception) {
     }
@@ -748,6 +748,35 @@ inline val Context.inputManager: InputMethodManager?
 inline val Context.notificationManager: NotificationManager?
     get() = getSystemService(NOTIFICATION_SERVICE) as? NotificationManager
 
+
+/**
+ * Extension method to get if the notifications enabled or not for Context.
+ */
+fun Context.areNotificationsEnabled(): Boolean {
+    val notificationManager = getSystemService(NOTIFICATION_SERVICE) as? NotificationManager
+
+    return if (notificationManager != null) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            notificationManager.importance != NotificationManager.IMPORTANCE_NONE
+        } else {
+            Settings.Secure.getInt(contentResolver, "notification_enabled", 1) == 1
+        }
+    } else {
+        false
+    }
+}
+/**
+ * Extension method to navigate user to Notification settings for Context.
+ */
+fun Context.navigateToNotificationSettings() {
+    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+    startActivity(intent)
+}
+
+
+
+
 /**
  * Extension method to get keyguardManager for Context.
  */
@@ -870,14 +899,14 @@ fun Context.rate(): Boolean =
  * Extension method to provide quicker access to the [LayoutInflater] from [Context].
  */
 fun Context.getLayoutInflater() =
-    getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    getSystemService(LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
 /**
  * Extension method to send sms for Context.
  */
 fun Context.sms(phone: String?, body: String = "") {
     val smsToUri = Uri.parse("smsto:" + phone)
-    val intent = Intent(Intent.ACTION_SENDTO, smsToUri)
+    val intent = Intent(ACTION_SENDTO, smsToUri)
     intent.putExtra("sms_body", body)
     startActivity(intent)
 }
@@ -885,7 +914,7 @@ fun Context.sms(phone: String?, body: String = "") {
 /**
  * Extension method to dail telephone number for Context.
  */
-fun Context.dial(tel: String?) = startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + tel)))
+fun Context.dial(tel: String?) = startActivity(Intent(ACTION_DIAL, Uri.parse("tel:" + tel)))
 
 /**
  * Extension method to get theme for Context.
@@ -897,11 +926,11 @@ fun Context.isDarkTheme(): Boolean =
  * Extension method to get bluetoothManager for Context.
  */
 fun Context.bluetoothManager(): BluetoothManager {
-    return getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+    return getSystemService(BLUETOOTH_SERVICE) as BluetoothManager
 }
 
 fun Context.locationManager(): LocationManager {
-    return this.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    return this.getSystemService(LOCATION_SERVICE) as LocationManager
 }
 /** Check if System's Location os On/Off*/
 fun Context.isLocationEnabled(): Boolean {
@@ -913,7 +942,7 @@ fun Context.isLocationEnabled(): Boolean {
 /** Navigate to Setting screen*/
 fun Context.navigateToLocationSettings() {
     val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    intent.addFlags(FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)
 }
 
