@@ -2,11 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_gravity="center"
     android:background="@drawable/dialog_layout"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_margin="@dimen/_10sdp"
+    android:translationZ="@dimen/_3sdp"
+    android:id="@+id/view_dialog">
 
 
 
@@ -18,7 +21,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="@dimen/_14sdp"
-            android:textColor="@color/dark_grey"
+            android:textColor="@color/title"
             android:textSize="@dimen/_16ssp" />
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -32,6 +35,7 @@
             android:gravity="center"
             android:textAlignment="center"
             android:textSize="@dimen/_12ssp"
+            android:textColor="@color/subtitle"
             tools:text="Hello world !!!" />
 
         <androidx.appcompat.widget.AppCompatButton
@@ -57,7 +61,7 @@
             android:gravity="center_horizontal"
             android:text="Cancel"
             android:textAllCaps="false"
-            android:textColor="@color/dark_grey"
+            android:textColor="@color/subtitle"
             android:textSize="@dimen/_12ssp" />
 
     </LinearLayout>

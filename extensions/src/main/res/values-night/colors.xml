@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="more_separator">#1A212121</color>
+    <color name="background">#3E3D3D</color>
+    <color name="title">#f6f6f6</color>
+    <color name="subtitle">#BBC0C5</color>
+    <color name="description">#909294</color>
+</resources>

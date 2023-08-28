@@ -8,5 +8,9 @@
     <color name="grey_40">#999999</color>
     <color name="dark_grey">#6E798C</color>
     <color name="default_color">#081F32</color>
-    <color name="more_separator">#F2F2F2</color>
+    <color name="more_separator">#1AFFFCFC</color>
+    <color name="background">#F2F2F2</color>
+    <color name="title">#0C0C0C</color>
+    <color name="subtitle">#191919</color>
+    <color name="description">#252525</color>
 </resources>

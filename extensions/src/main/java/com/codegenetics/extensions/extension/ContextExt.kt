@@ -768,7 +768,7 @@ fun Context.areNotificationsEnabled(): Boolean {
 /**
  * Extension method to navigate user to Notification settings for Context.
  * for Android 11 or above add following in Manifest
- *   <queries>
+ *  @see <queries>
  *         <intent>
  *             <action android:name="android.settings.APP_NOTIFICATION_SETTINGS" />
  *         </intent>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -9,11 +10,13 @@
 
 
     <LinearLayout
+        android:id="@+id/view_dialog"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:background="@drawable/dialog_layout"
         android:orientation="vertical"
+        android:translationZ="@dimen/_3sdp"
         android:padding="@dimen/_10sdp"
         android:layout_margin="@dimen/_20sdp">
 
@@ -22,7 +25,8 @@
             android:layout_width="@dimen/_25sdp"
             android:layout_height="@dimen/_25sdp"
             android:layout_gravity="end"
-            android:src="@drawable/ic_close" />
+            android:src="@drawable/ic_close"
+            app:tint="@color/description" />
 
 
         <ImageView
@@ -40,7 +44,7 @@
             android:padding="@dimen/_7sdp"
             android:gravity="center"
             android:textAlignment="center"
-            android:textColor="@color/black"
+            android:textColor="@color/title"
             android:textSize="@dimen/_14ssp"
             tools:text="title"
             />
@@ -55,6 +59,7 @@
             android:gravity="center"
             android:textAlignment="center"
             android:textSize="@dimen/_13ssp"
+            android:textColor="@color/subtitle"
             tools:text="Hello world !!!" />
 
 

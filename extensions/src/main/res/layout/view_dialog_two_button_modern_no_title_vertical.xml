@@ -7,7 +7,10 @@
     android:background="@drawable/dialog_bg_white"
     android:orientation="vertical"
     app:cardCornerRadius="@dimen/_10sdp"
-    app:cardElevation="@dimen/_5sdp">
+    app:cardElevation="@dimen/_5sdp"
+    android:id="@+id/view_dialog"
+    android:layout_margin="@dimen/_10sdp"
+    android:translationZ="@dimen/_3sdp">
 
 
     <RelativeLayout
@@ -23,7 +26,8 @@
             android:layout_gravity="end"
             android:layout_marginTop="@dimen/_7sdp"
             android:layout_marginEnd="@dimen/_7sdp"
-            android:src="@drawable/ic_close" />
+            android:src="@drawable/ic_close"
+            app:tint="@color/subtitle" />
 
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -36,7 +40,7 @@
             android:layout_marginTop="@dimen/_12sdp"
             android:layout_toStartOf="@id/ivClose"
             android:paddingEnd="@dimen/_20sdp"
-            android:textColor="@color/dark_grey"
+            android:textColor="@color/subtitle"
             android:textSize="@dimen/_12ssp" />
 
 

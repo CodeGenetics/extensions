@@ -18,6 +18,8 @@ import com.codegenetics.extensions.lib.databinding.*
         titleLeftButton: String = "Cancel",
         @ColorRes colorRightButton: Int = R.color.red,
         @ColorRes colorLeftButton: Int = R.color.colorPrimary,
+        @ColorRes backgroundColor:Int = R.color.background,
+        @DrawableRes background:Int = R.drawable.dialog_layout,
         callback: (Boolean, Dialog) -> Unit
     ) {
         val dialog = Dialog(this)
@@ -26,6 +28,8 @@ import com.codegenetics.extensions.lib.databinding.*
         dialog.setCanceledOnTouchOutside(false)
 
         binding.apply {
+            viewDialog.setBackgroundResource(background)
+            viewDialog.changeBackgroundColor(backgroundColor)
             tvTitle.text = title
             tvMessage.text = msg
             btnRight.text = titleRightButton
@@ -34,6 +38,7 @@ import com.codegenetics.extensions.lib.databinding.*
             btnLeft.textColor(colorLeftButton)
             btnLeft.setOnClickListener { callback(false, dialog) }
             btnRight.setOnClickListener { callback(true, dialog) }
+
 
         }
         dialog.show()
@@ -55,6 +60,8 @@ import com.codegenetics.extensions.lib.databinding.*
         @ColorRes textColorNegativeButton: Int = R.color.dark_grey,
         @DrawableRes bgPositiveButton: Int = R.drawable.primary_bg,
         @DrawableRes bgNegativeButton: Int = R.drawable.bg_transparent,
+        @ColorRes backgroundColor:Int = R.color.background,
+        @DrawableRes background:Int = R.drawable.dialog_layout,
         callback: (Boolean, Dialog) -> Unit
     ) {
         val dialog = Dialog(this)
@@ -64,6 +71,8 @@ import com.codegenetics.extensions.lib.databinding.*
 
 
         binding.apply {
+            viewDialog.setBackgroundResource(background)
+            viewDialog.changeBackgroundColor(backgroundColor)
             tvTitle.text = title
             tvMessage.text = msg
             btnPositive.text = titlePositive
@@ -100,6 +109,7 @@ import com.codegenetics.extensions.lib.databinding.*
 
 
         binding.apply {
+
             tvTitle.text = msg
 
             if (titlePositive.isNotEmptyAndBlank()) {
@@ -178,6 +188,8 @@ import com.codegenetics.extensions.lib.databinding.*
         titleButton: String = "OK",
         @ColorRes colorButton: Int = R.color.colorPrimary,
         @DrawableRes btnDrawable: Int = R.drawable.bg_transparent,
+        @ColorRes backgroundColor:Int = R.color.background,
+        @DrawableRes background:Int = R.drawable.dialog_layout,
         callback: (Dialog) -> Unit
     ): Dialog {
         val dialog = Dialog(this)
@@ -186,6 +198,8 @@ import com.codegenetics.extensions.lib.databinding.*
         dialog.setCanceledOnTouchOutside(false)
 
         binding.apply {
+            viewDialog.setBackgroundResource(background)
+            viewDialog.changeBackgroundColor(backgroundColor)
             if (title.isNotEmptyAndBlank()) {
                 tvTitle.text = title
             } else {
@@ -220,6 +234,8 @@ import com.codegenetics.extensions.lib.databinding.*
         @DrawableRes icon: Int = 0,
         @ColorRes colorButton: Int = R.color.colorPrimary,
         @DrawableRes btnDrawable: Int = R.drawable.bg_transparent,
+        @ColorRes backgroundColor:Int = R.color.background,
+        @DrawableRes background:Int = R.drawable.dialog_layout,
         callback: (Dialog) -> Unit
     ) {
         val dialog = Dialog(this)
@@ -228,6 +244,8 @@ import com.codegenetics.extensions.lib.databinding.*
         dialog.setCanceledOnTouchOutside(false)
 
         binding.apply {
+            viewDialog.setBackgroundResource(background)
+            viewDialog.changeBackgroundColor(backgroundColor)
             if (title.isNotEmptyAndBlank()) {
                 tvTitle.text = title
             } else {

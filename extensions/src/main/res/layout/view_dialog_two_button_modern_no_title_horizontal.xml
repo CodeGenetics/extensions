@@ -8,7 +8,9 @@
     android:background="@drawable/dialog_bg_white"
     android:orientation="vertical"
     app:cardCornerRadius="@dimen/_10sdp"
-    app:cardElevation="@dimen/_5sdp">
+    app:cardElevation="@dimen/_5sdp"
+    android:layout_margin="@dimen/_10sdp"
+    android:id="@+id/view_dialog">
 
 
     <RelativeLayout
@@ -24,7 +26,8 @@
             android:layout_gravity="end"
             android:layout_marginTop="@dimen/_7sdp"
             android:layout_marginEnd="@dimen/_7sdp"
-            android:src="@drawable/ic_close" />
+            android:src="@drawable/ic_close"
+            app:tint="@color/subtitle" />
 
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -38,7 +41,7 @@
             android:layout_toStartOf="@id/ivClose"
             android:paddingEnd="@dimen/_20sdp"
             tools:text="are_your_sure_to_exit_live_room"
-            android:textColor="@color/default_color"
+            android:textColor="@color/subtitle"
             android:textSize="@dimen/_12ssp" />
 
         <LinearLayout
