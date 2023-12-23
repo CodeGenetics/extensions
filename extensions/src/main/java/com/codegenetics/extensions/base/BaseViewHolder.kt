@@ -1,8 +1,6 @@
-package com.codegenetics.extensions.base
+package com.my_constants.bases
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 
-abstract class BaseViewHolder<T>(binding: Any) : RecyclerView.ViewHolder(binding as View) {
-        abstract fun bind(data: T)
-    }
+open class BaseViewHolder<out T : ViewBinding>(val binding: T) : RecyclerView.ViewHolder(binding.root)

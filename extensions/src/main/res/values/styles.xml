@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="AppDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
         <item name="android:colorBackground">@android:color/transparent</item>
@@ -49,4 +49,57 @@
 
 
     </style>
+
+
+    <style name="ThemeDialog" parent="android:Theme.Holo.Dialog">
+        <item name="android:windowMinWidthMajor">88%</item>
+        <item name="android:windowMinWidthMinor">88%</item>
+
+        <!-- Used for the buttons -->
+        <!--        <item name="colorPrimary">@color/colorPrimaryDark</item>
+                <item name="colorAccent">@color/colorPrimaryDark</item>
+                <item name="android:colorAccent">@color/colorPrimaryDark</item>
+                <item name="android:colorPrimary">@color/colorPrimaryDark</item>-->
+        <!-- Used for the title and text -->
+        <item name="android:textColorPrimary">@android:color/white</item>
+
+        <item name="bottomSheetDialogTheme">@style/AppBottomSheetDialogTheme</item>
+
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
+
+        <item name="buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="buttonBarPositiveButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="android:buttonBarNegativeButtonStyle">@style/NegativeButtonStyle</item>
+        <item name="android:buttonBarPositiveButtonStyle">@style/NegativeButtonStyle</item>
+
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowAnimationStyle">@style/MyAnimation.Window</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+
+    </style>
+
+    <style name="NegativeButtonStyle" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+
+    <style name="MyAnimation.Window" parent="@android:style/Animation.Activity">
+        <item name="android:windowEnterAnimation">@anim/zoom_in_dialog</item>
+        <item name="android:windowExitAnimation">@anim/zoom_out_dialog</item>
+    </style>
+
+    <style name="AppBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/AppModalStyle</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+
+        <item name="android:statusBarColor">@android:color/transparent</item>
+
+    </style>
+
+    <style name="AppModalStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bg_bottom_sheets</item>
+    </style>
+
 </resources>

@@ -50,6 +50,7 @@ fun Activity.setStatusBarColor(@ColorRes colorId: Int) {
         e.printStackTrace()
     }
 }
+
 /** navigate you to the system setting of that app.
  * default @param[requestCode]=555
  * provide @param[requestCode] to get result in
@@ -149,7 +150,11 @@ fun Activity.turnOnScreen() {
 enum class StatusIconColorType {
     Dark, Light
 }
-fun Activity.setStatusBarColor(color: Int, iconColorType: StatusIconColorType = StatusIconColorType.Light) {
+
+fun Activity.setStatusBarColor(
+    color: Int,
+    iconColorType: StatusIconColorType = StatusIconColorType.Light
+) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         this.window.apply {
             clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
@@ -168,8 +173,10 @@ fun Activity.setStatusBarColor(color: Int, iconColorType: StatusIconColorType = 
  */
 fun Activity.hideSoftKeyboard() {
     if (currentFocus != null) {
-        val inputMethodManager = getSystemService(Context
-            .INPUT_METHOD_SERVICE) as InputMethodManager
+        val inputMethodManager = getSystemService(
+            Context
+                .INPUT_METHOD_SERVICE
+        ) as InputMethodManager
         inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
     }
 }
@@ -209,4 +216,17 @@ fun AppCompatActivity.setupActionBar(@IdRes toolbarId: Int, action: ActionBar.()
  */
 fun Activity.getContentView(): ViewGroup {
     return this.findViewById(android.R.id.content) as ViewGroup
+}
+
+fun Activity.checkPermissionRationale(
+    permission: String
+): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val shouldShowRequestPermissionRationale = shouldShowRequestPermissionRationale(permission)
+        Log.d("PermissionLogs", "checkPermissionRationale: $shouldShowRequestPermissionRationale")
+        shouldShowRequestPermissionRationale
+    } else {
+        Log.d("PermissionLogs", "checkPermissionRationaleElse: false")
+        false
+    }
 }
