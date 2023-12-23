@@ -1,4 +1,4 @@
-package com.my_constants.bases
+package com.codegenetics.extensions.base
 
 import android.content.res.Configuration
 import android.os.Bundle

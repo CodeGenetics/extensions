@@ -1,4 +1,4 @@
-package com.my_constants.bases
+package com.codegenetics.extensions.base
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,9 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.CallSuper
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewbinding.ViewBinding
-import com.codegenetics.extensions.extension.checkPermissionRationale
-import com.codegenetics.extensions.extension.requestPermission
-import com.codegenetics.extensions.extension.setStatusBarColor
 import com.codegenetics.extensions.lazyAndroid
 import com.codegenetics.extensions.lib.R
 import kotlinx.coroutines.CoroutineScope

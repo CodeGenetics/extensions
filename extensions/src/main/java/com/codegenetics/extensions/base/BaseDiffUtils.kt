@@ -1,4 +1,4 @@
-package com.my_constants.bases
+package com.codegenetics.extensions.base
 
 import androidx.recyclerview.widget.DiffUtil
 
