@@ -9,18 +9,18 @@ import androidx.viewbinding.ViewBinding
 abstract class BaseAdapter<Model : Any, Binding : ViewBinding>(
     private val bindingFactory: (LayoutInflater, ViewGroup?, Boolean) -> Binding,
     callback: DiffUtil.ItemCallback<Model> = BaseDiffUtils(),
-) : ListAdapter<Model, BaseViewHolder<Binding>>(callback) {
+) : ListAdapter<Model, BaseViewHolderV2<Binding>>(callback) {
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolder<Binding> {
-        return BaseViewHolder(
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BaseViewHolderV2<Binding> {
+        return BaseViewHolderV2(
             bindingFactory.invoke(
                 LayoutInflater.from(parent.context), parent, false
             )
         )
     }
 
-    override fun onBindViewHolder(holder: BaseViewHolder<Binding>, position: Int) {
+    override fun onBindViewHolder(holder: BaseViewHolderV2<Binding>, position: Int) {
         with(holder) {
             binding.root.tag = position
             binding.bindViews(getItem(absoluteAdapterPosition))
