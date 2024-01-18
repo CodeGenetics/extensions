@@ -2,7 +2,36 @@
 # Kotlin Extensions/Utils
 ## Whats New:
 ```
-BaseActivity
+NetworkConnectivityMonitor
+```
+## Usage
+```
+class MainActivity : AppCompatActivity(), NetworkConnectivityMonitor.NetworkStatusCallback {
+
+    private lateinit var networkMonitor: NetworkConnectivityMonitor
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        networkMonitor = NetworkConnectivityMonitor(this)
+        networkMonitor.startMonitoring(this)
+    }
+
+    override fun onNetworkAvailable() {
+        // Handle network available
+    }
+
+    override fun onNetworkUnavailable() {
+        // Handle network unavailable
+    }
+
+    override fun onDestroy() {
+        networkMonitor.stopMonitoring()
+        super.onDestroy()
+    }
+}
+
 ```
 ```
 BaseAdapter
