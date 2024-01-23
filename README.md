@@ -1,10 +1,37 @@
-
 # Kotlin Extensions/Utils
-## Whats New:
+
+## Whats New in 2.1.0:
+
+```
+Coroutine Scopes for Activity,Fragment and ViewModel
+launchMain{} [NEW]
+launchDefault{} [NEW]
+launchIO{} [NEW]
+```
+
+```
+Context.getColor(@ColorRes id: Int) [DEPRICATED}
+Context.color(@ColorRes id: Int) [DEPRICATED}
+Context.getColorResource(@ColorRes id: Int) [ALTERNATIVE]
+```
+
+```
+Context.getDrawable(@DrawableRes id: Int) [DEPRICATED}
+Context.getDrawableResource(@DrawableRes id: Int) [ALTERNATIVE]
+```
+
+```
+Context.isNotificationPermissionGranted() [NEW]
+```
+
+## Whats New 2.0.9:
+
 ```
 NetworkConnectivityMonitor
 ```
+
 ## Usage
+
 ```
 class MainActivity : AppCompatActivity(), NetworkConnectivityMonitor.NetworkStatusCallback {
 
@@ -33,15 +60,15 @@ class MainActivity : AppCompatActivity(), NetworkConnectivityMonitor.NetworkStat
 }
 
 ```
+
 ```
 BaseAdapter
 ```
 
-
-
 ## Installation:
 
 -Add it in your root build.gradle at the end of repositories:
+
 ```
 dependencyResolutionManagement {
 		repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -51,7 +78,9 @@ dependencyResolutionManagement {
 		}
 	}
 ```
+
 -Add the dependency
+
 ```
 dependencies {
 	        implementation 'com.github.CodeGenetics:extensions:latest_release'
@@ -59,7 +88,9 @@ dependencies {
 ```
 
 # Usage
+
 ## Context
+
 ```
 
 openActivity<ClassName>(vararg params: Pair<String, Any?>)
@@ -108,9 +139,6 @@ displayMetrics: DisplayMetrics
 
 
 ```
-
-
-
 
 ## Contributing
 

@@ -5,8 +5,8 @@ plugins {
 }
 
 ext{
-    versionCode = 28
-    versionName = "2.0.9"
+    versionCode = 29
+    versionName = "2.1.0"
 }
 
 android {
@@ -49,8 +49,9 @@ dependencies {
     api 'androidx.appcompat:appcompat:1.6.1'
     api 'androidx.recyclerview:recyclerview:1.2.1'
     api 'com.karumi:dexter:6.2.3'
-    api 'com.intuit.sdp:sdp-android:1.0.6'
-    api 'com.intuit.ssp:ssp-android:1.0.6'
+    api 'com.intuit.sdp:sdp-android:1.1.0'
+    api 'com.intuit.ssp:ssp-android:1.1.0'
+    api 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0'
 
 
     //Glide Image Loading

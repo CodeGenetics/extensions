@@ -1,5 +1,6 @@
 package com.codegenetics.extensions.extension
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.*
 import android.app.admin.DevicePolicyManager
@@ -30,6 +31,7 @@ import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.annotation.*
+import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -42,11 +44,15 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
+import com.codegenetics.extensions.lib.R
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -227,6 +233,30 @@ fun Context.color(@ColorRes res: Int): Int {
     return ContextCompat.getColor(this, res)
 }
 
+@RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
+fun Context.shareText(title:String="Share", text: String="", receiver: Intent) {
+    try {
+            val intent = Intent(Intent.ACTION_SEND)
+            intent.type = "text/plain"
+            intent.putExtra(Intent.EXTRA_SUBJECT, text)
+            val shareMsg = text.trim { it <= ' ' }
+            intent.putExtra(Intent.EXTRA_TEXT, shareMsg)
+            val pendingIntent = PendingIntent.getBroadcast(
+                this@shareText, 0,
+                receiver, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            startActivity(
+                createChooser(
+                    intent,
+                    "Share link",
+                    pendingIntent.intentSender
+                )
+            )
+    } catch (e: java.lang.Exception) {
+        e.printStackTrace()
+    }
+}
+
 /** opens chooser to share file
  * @param filePath
  * @param msg
@@ -331,19 +361,6 @@ fun Context.getBitmap(@DrawableRes drawable: Int): Bitmap {
 
 }
 
-/**
- * @param [name] string
- * @return Drawable */
-fun Context.getDrawableByName(name: String): Drawable? {
-    val resources = this.resources
-    val resourceId = resources.getIdentifier(name, "drawable", this.packageName)
-    return if (resourceId != 0) {
-        ResourcesCompat.getDrawable(resources, resourceId, null)
-    } else {
-        null
-    }
-}
-
 /** @param listOf(Manifest.permission.POST_NOTIFICATIONS)*/
 fun Context.requestPermission(permission: Collection<String>, callback: (Boolean) -> Unit) {
     Dexter.withContext(this).withPermissions(permission)
@@ -363,6 +380,19 @@ fun Context.requestPermission(permission: Collection<String>, callback: (Boolean
                 permissionToken.continuePermissionRequest()
             }
         }).check()
+}
+
+/**
+ * @param [name] string
+ * @return Drawable */
+fun Context.getDrawableByName(name: String): Drawable? {
+    val resources = this.resources
+    val resourceId = resources.getIdentifier(name, "drawable", this.packageName)
+    return if (resourceId != 0) {
+        ResourcesCompat.getDrawable(resources, resourceId, null)
+    } else {
+        null
+    }
 }
 
 /** @return string contains Manufacturer-Model-Ram*/
@@ -628,6 +658,11 @@ fun Context.openEmailIntent() {
 /**
  * Extension method to provide simpler access to {@link ContextCompat#getColor(int)}.
  */
+@Deprecated(
+    "Use {@link getColorResource or simple color}", ReplaceWith(
+        "color(R.color.) or getColorResource(R.color)"
+    )
+)
 fun Context.getColorCompat(color: Int) = ContextCompat.getColor(this, color)
 
 /**
@@ -717,15 +752,11 @@ fun Context.getInteger(@IntegerRes id: Int) = resources.getInteger(id)
  */
 fun Context.getBoolean(@BoolRes id: Int) = resources.getBoolean(id)
 
-/**
- * Extension method to Get Color for resource for Context.
- */
-fun Context.getColor(@ColorRes id: Int) = ContextCompat.getColor(this, id)
 
 /**
  * Extension method to Get Drawable for resource for Context.
  */
-fun Context.getDrawable(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
+fun Context.getDrawableResource(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
 
 /**
  * InflateLayout
@@ -765,14 +796,17 @@ fun Context.areNotificationsEnabled(): Boolean {
         false
     }
 }
+
 /**
  * Extension method to navigate user to Notification settings for Context.
  * for Android 11 or above add following in Manifest
+ * Consider adding a <queries> declaration to your manifest when calling this method;
  *  @see <queries>
  *         <intent>
  *             <action android:name="android.settings.APP_NOTIFICATION_SETTINGS" />
  *         </intent>
  *     </queries>
+ *
  */
 fun Context.navigateToNotificationSettings() {
     val intent = Intent()
@@ -781,11 +815,13 @@ fun Context.navigateToNotificationSettings() {
             intent.action = Settings.ACTION_APP_NOTIFICATION_SETTINGS
             intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
         }
+
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
             intent.addCategory(Intent.CATEGORY_DEFAULT)
             intent.data = android.net.Uri.parse("package:$packageName")
         }
+
         else -> {
             intent.action = Settings.ACTION_APPLICATION_SETTINGS
         }
@@ -859,11 +895,11 @@ fun Context.share(text: String, subject: String = ""): Boolean {
     intent.type = "text/plain"
     intent.putExtra(EXTRA_SUBJECT, subject)
     intent.putExtra(EXTRA_TEXT, text)
-    try {
+    return try {
         startActivity(createChooser(intent, null))
-        return true
+        true
     } catch (e: ActivityNotFoundException) {
-        return false
+        false
     }
 }
 
@@ -871,12 +907,12 @@ fun Context.share(text: String, subject: String = ""): Boolean {
  * Extension method to make call for Context.
  */
 fun Context.makeCall(number: String): Boolean {
-    try {
+    return try {
         val intent = Intent(ACTION_CALL, Uri.parse("tel:$number"))
         startActivity(intent)
-        return true
+        true
     } catch (e: Exception) {
-        return false
+        false
     }
 }
 
@@ -884,14 +920,14 @@ fun Context.makeCall(number: String): Boolean {
  * Extension method to Send SMS for Context.
  */
 fun Context.sendSms(number: String, text: String = ""): Boolean {
-    try {
+    return try {
         Intent(ACTION_VIEW, Uri.parse("sms:$number")).apply {
             putExtra("sms_body", text)
             startActivity(this)
         }
-        return true
+        true
     } catch (e: Exception) {
-        return false
+        false
     }
 }
 
@@ -899,15 +935,15 @@ fun Context.sendSms(number: String, text: String = ""): Boolean {
  * Extension method to browse for Context.
  */
 fun Context.browse(url: String, newTask: Boolean = false): Boolean {
-    try {
+    return try {
         Intent(ACTION_VIEW).apply {
             data = Uri.parse(url)
             if (newTask) addFlags(FLAG_ACTIVITY_NEW_TASK)
             startActivity(this)
         }
-        return true
+        true
     } catch (e: Exception) {
-        return false
+        false
     }
 }
 
@@ -954,6 +990,7 @@ fun Context.bluetoothManager(): BluetoothManager {
 fun Context.locationManager(): LocationManager {
     return this.getSystemService(LOCATION_SERVICE) as LocationManager
 }
+
 /** Check if System's Location os On/Off*/
 fun Context.isLocationEnabled(): Boolean {
     return locationManager().isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager().isProviderEnabled(
@@ -974,3 +1011,26 @@ fun Context.isPermissionGranted(permission: String): Boolean {
         permission
     ) == PackageManager.PERMISSION_GRANTED
 }
+
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+fun Context.isNotificationPermissionGranted(): Boolean {
+    return isPermissionGranted(Manifest.permission.POST_NOTIFICATIONS)
+}
+
+/*************************************************************
+ *******************DEPRECATED METHODS************************
+ *************************************************************/
+
+
+@Deprecated(
+    "Use getColorResource", ReplaceWith(
+        "getColorResource"
+    )
+)
+fun Context.getColor(@ColorRes id: Int) = ContextCompat.getColor(this, id)
+
+/**
+ * Extension method to Get Drawable for resource for Context.
+ */
+@Deprecated("Use getDrawableResource", ReplaceWith("getDrawableResource"))
+fun Context.getDrawable(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)

@@ -24,7 +24,13 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.codegenetics.extensions.lib.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 /** return activity instance in callback
  * check if it is not finishing and destroyed*/
@@ -229,4 +235,25 @@ fun Activity.checkPermissionRationale(
         Log.d("PermissionLogs", "checkPermissionRationaleElse: false")
         false
     }
+}
+
+/** Directly call launch from activity for Coroutine Default
+ * attached with lifecycle*/
+fun AppCompatActivity.launchDefault(
+    context: CoroutineContext = Dispatchers.Default,
+    block: suspend CoroutineScope.() -> Unit
+): Job {
+    return lifecycleScope.launch(context = context, block = block)
+}
+
+/** Directly call launch from activity for Coroutine Main
+ * attached with lifecycle*/
+fun AppCompatActivity.launchMain(block: suspend CoroutineScope.() -> Unit): Job {
+    return launchDefault(context = Dispatchers.Main, block = block)
+}
+
+/** Directly call launch from activity for Coroutine IO
+ * attached with lifecycle*/
+fun AppCompatActivity.launchIO(block: suspend CoroutineScope.() -> Unit): Job {
+    return launchDefault(Dispatchers.IO, block = block)
 }

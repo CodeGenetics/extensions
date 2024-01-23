@@ -6,7 +6,13 @@ import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.codegenetics.extensions.lib.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
 fun Fragment.isAlive(callback: (Activity) -> Unit) {
     if (activity != null && isAdded && !isDetached) {
@@ -67,4 +73,24 @@ fun Fragment.rate() = activity?.rate()
  */
 fun Fragment.hideSoftKeyboard() {
     activity?.hideSoftKeyboard()
+}
+
+/** Directly call launch from activity for Coroutine Default
+ * attached with lifecycle*/
+fun Fragment.launchDefault(
+    context: CoroutineContext = Dispatchers.Default,
+    block: suspend CoroutineScope.() -> Unit
+): Job {
+    return lifecycleScope.launch(context = context, block = block)
+}
+/** Directly call launch from activity for Coroutine Main
+ * attached with lifecycle*/
+fun Fragment.launchMain(block: suspend CoroutineScope.() -> Unit): Job {
+    return launchDefault(context = Dispatchers.Main, block = block)
+}
+
+/** Directly call launch from fragment for Coroutine IO
+ * attached with lifecycle*/
+fun Fragment.launchIO(block: suspend CoroutineScope.() -> Unit): Job {
+    return launchDefault(context = Dispatchers.IO, block = block)
 }
