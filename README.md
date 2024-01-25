@@ -1,6 +1,6 @@
 # Kotlin Extensions/Utils
 
-## Whats New in 2.1.0:
+## Whats New in 2.1.1:
 
 ```
 Coroutine Scopes for Activity,Fragment and ViewModel
