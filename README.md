@@ -1,5 +1,12 @@
 # Kotlin Extensions/Utils
 
+## Whats New in 2.1.1:
+
+```
+HeavyLinearLayout
+(To avoid Inconsistency Index of Bound Excception)
+```
+
 ## Whats New in 2.1.0:
 
 ```
