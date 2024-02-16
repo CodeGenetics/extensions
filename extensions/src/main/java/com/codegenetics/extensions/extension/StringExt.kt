@@ -43,6 +43,7 @@ fun String.validateColor(): String {
         return ""
     }
 }
+
 /** return color in Integer*/
 fun String.toColor(): Int {
     return try {
@@ -236,4 +237,8 @@ fun String.toCamelCaseWithSpaces(): String {
     val result = regex.replace(this, " ")
     // Capitalize the first character of each word
     return result.split(" ").joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+}
+
+fun String?.isNotNullEmptyBlank(): Boolean {
+    return this != null && this.isNotEmptyAndBlank()
 }
