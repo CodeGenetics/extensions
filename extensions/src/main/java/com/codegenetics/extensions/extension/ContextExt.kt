@@ -419,7 +419,7 @@ fun Context.preLoadImageWithGlide(url: Any?, callback: (Boolean) -> Unit) {
             override fun onLoadFailed(
                 e: GlideException?,
                 model: Any?,
-                target: Target<Drawable>?,
+                target: Target<Drawable>,
                 isFirstResource: Boolean
             ): Boolean {
                 callback(false)
@@ -427,10 +427,10 @@ fun Context.preLoadImageWithGlide(url: Any?, callback: (Boolean) -> Unit) {
             }
 
             override fun onResourceReady(
-                resource: Drawable?,
-                model: Any?,
-                target: Target<Drawable>?,
-                dataSource: DataSource?,
+                resource: Drawable,
+                model: Any,
+                target: Target<Drawable>,
+                dataSource: DataSource,
                 isFirstResource: Boolean
             ): Boolean {
                 callback(true)
@@ -449,7 +449,7 @@ fun Context.preLoadImageWithGlide(urlList: List<Any>, callback: (Boolean) -> Uni
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any?,
-                    target: Target<Drawable>?,
+                    target: Target<Drawable>,
                     isFirstResource: Boolean
                 ): Boolean {
                     callback(false)
@@ -457,10 +457,10 @@ fun Context.preLoadImageWithGlide(urlList: List<Any>, callback: (Boolean) -> Uni
                 }
 
                 override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
+                    resource: Drawable,
+                    model: Any,
+                    target: Target<Drawable>,
+                    dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
                     callback(true)
@@ -483,17 +483,17 @@ fun Context.getDrawable(
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any?,
-                    target: Target<Drawable>?,
+                    target: Target<Drawable>,
                     isFirstResource: Boolean
                 ): Boolean {
                     return false
                 }
 
                 override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
+                    resource: Drawable,
+                    model: Any,
+                    target: Target<Drawable>,
+                    dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
                     callback(resource!!)
@@ -519,17 +519,17 @@ fun Context.getDrawable(
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any?,
-                    target: Target<Drawable>?,
+                    target: Target<Drawable>,
                     isFirstResource: Boolean
                 ): Boolean {
                     return false
                 }
 
                 override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
+                    resource: Drawable,
+                    model: Any,
+                    target: Target<Drawable>,
+                    dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
                     callback(resource!!)
@@ -557,10 +557,10 @@ fun Context.getBitmap(url: String, callback: (Bitmap) -> Unit) {
                 }
 
                 override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
+                    resource: Drawable,
+                    model: Any,
+                    target: Target<Drawable>,
+                    dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
                     return true
@@ -569,7 +569,7 @@ fun Context.getBitmap(url: String, callback: (Bitmap) -> Unit) {
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any?,
-                    target: Target<Drawable>?,
+                    target: Target<Drawable>,
                     isFirstResource: Boolean
                 ): Boolean {
                     return false
@@ -601,10 +601,10 @@ fun Context.getBitmap(
                 }
 
                 override fun onResourceReady(
-                    resource: Drawable?,
-                    model: Any?,
-                    target: Target<Drawable>?,
-                    dataSource: DataSource?,
+                    resource: Drawable,
+                    model: Any,
+                    target: Target<Drawable>,
+                    dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
                     return true
@@ -613,7 +613,7 @@ fun Context.getBitmap(
                 override fun onLoadFailed(
                     e: GlideException?,
                     model: Any?,
-                    target: Target<Drawable>?,
+                    target: Target<Drawable>,
                     isFirstResource: Boolean
                 ): Boolean {
                     return false

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppDialog" parent="Theme.AppCompat.DayNight.Dialog.Alert">
+    <style name="AppDialog">
         <item name="android:colorBackground">@android:color/transparent</item>
     </style>
 

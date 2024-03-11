@@ -2,38 +2,57 @@ package com.codegenetics.extensions.extension
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.content.res.ColorStateList
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Looper
 import android.text.Editable
 import android.text.TextPaint
 import android.text.style.ClickableSpan
-import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
-import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
-import androidx.annotation.LayoutRes
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.ViewModel
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
 import java.math.RoundingMode
 import java.text.DecimalFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Date
 
 fun Any.twoDecimal(): String {
     val df = DecimalFormat("0.00")
     return df.format(this.toString().toDouble())
 }
+
+fun Any.parseDouble(): Double {
+    return try {
+        if (this.isNotEmptyAndBlank()) {
+            this.toString().toDouble()
+        } else {
+            0.0
+        }
+    } catch (e: NumberFormatException) {
+        e.printStackTrace()
+        0.0
+    }
+}
+
+fun Any.parseInt(): Int {
+    return try {
+        if (this.isNotEmptyAndBlank()) {
+            this.toString().toInt()
+        } else {
+            0
+        }
+    } catch (e: NumberFormatException) {
+        e.printStackTrace()
+        0
+    }
+}
+
+
 
 fun Any.roundUpToTwoDecimalsWithoutRounding(): String? {
     val df = DecimalFormat("#.##")
