@@ -5,8 +5,8 @@ plugins {
 }
 
 ext{
-    versionCode = 30
-    versionName = "2.1.1"
+    versionCode = 32
+    versionName = "2.1.3"
 }
 
 android {
@@ -51,31 +51,17 @@ dependencies {
     api 'com.karumi:dexter:6.2.3'
     api 'com.intuit.sdp:sdp-android:1.1.0'
     api 'com.intuit.ssp:ssp-android:1.1.0'
+    api 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    api "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
+    api "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0"
+
 
 
 
     //Glide Image Loading
-    api 'com.github.bumptech.glide:glide:4.13.1'
-
-
-    //LifeCycle
-
-    api 'androidx.lifecycle:lifecycle-extensions:2.2.0'
-
-
-    def lifecycle_version = "2.5.1"
-    api "androidx.lifecycle:lifecycle-process:$lifecycle_version"
-    // ViewModel
-    api "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-    // LiveData
-    api "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-    // Lifecycles only (without ViewModel or LiveData)
-    api "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_version"
-    // Saved state module for ViewModel
-    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:$lifecycle_version"
-
-
-    api 'androidx.databinding:library:3.2.0-alpha11'
+    api 'com.github.bumptech.glide:glide:4.16.0'
+//    api 'androidx.lifecycle:lifecycle-process-ktx:2.4.0'
+    implementation 'androidx.databinding:library:3.2.0-alpha11'
 }
 
 afterEvaluate {

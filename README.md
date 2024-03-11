@@ -1,5 +1,12 @@
 # Kotlin Extensions/Utils
 
+## Whats New in 2.1.3:
+
+```
+parseInt() | parseDouble()
+Dialoges background Fixed
+```
+
 ## Whats New in 2.1.1:
 
 ```

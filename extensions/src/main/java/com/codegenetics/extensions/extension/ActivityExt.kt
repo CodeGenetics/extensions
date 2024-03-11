@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
-import android.text.TextUtils.replace
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.View

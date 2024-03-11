@@ -8,34 +8,59 @@ import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import com.codegenetics.extensions.extension.*
+import androidx.annotation.StyleRes
+import com.codegenetics.extensions.extension.changeBackgroundColor
+import com.codegenetics.extensions.extension.getScreenWidth
+import com.codegenetics.extensions.extension.gone
+import com.codegenetics.extensions.extension.hide
+import com.codegenetics.extensions.extension.isNotEmptyAndBlank
+import com.codegenetics.extensions.extension.loadImageWithGlide
+import com.codegenetics.extensions.extension.show
+import com.codegenetics.extensions.extension.textColor
 import com.codegenetics.extensions.lib.R
-import com.codegenetics.extensions.lib.databinding.*
-    fun Activity.showTwoButtonDialog(
+import com.codegenetics.extensions.lib.databinding.DialogOneButtonBinding
+import com.codegenetics.extensions.lib.databinding.DialogTwoButtonBinding
+import com.codegenetics.extensions.lib.databinding.DialogWithIconBinding
+import com.codegenetics.extensions.lib.databinding.ViewDialogTwoButtonModernBinding
+import com.codegenetics.extensions.lib.databinding.ViewDialogTwoButtonModernNoTitleHorizontalBinding
+import com.codegenetics.extensions.lib.databinding.ViewDialogTwoButtonModernNoTitleVerticalBinding
+
+/** Simple Two Button Dialog
+ * by default two text horizontal aligned
+ * */
+fun Activity.showTwoButtonDialog(
         title: String = "",
         msg: String,
         titleRightButton: String = "OK",
         titleLeftButton: String = "Cancel",
-        @ColorRes colorRightButton: Int = R.color.red,
-        @ColorRes colorLeftButton: Int = R.color.colorPrimary,
+        @ColorRes textColorRightButton: Int = R.color.red,
+        @ColorRes textColorLeftButton: Int = R.color.colorPrimary,
+        @DrawableRes bgRightButton: Int = 0,
+        @DrawableRes bgLeftButton: Int = 0,
         @ColorRes backgroundColor:Int = R.color.background,
         @DrawableRes background:Int = R.drawable.dialog_layout,
+        @StyleRes theme: Int = R.style.AppDialog,
         callback: (Boolean, Dialog) -> Unit
     ) {
-        val dialog = Dialog(this)
+    val dialog = Dialog(this, 0)
         val binding = DialogTwoButtonBinding.inflate(dialog.layoutInflater)
         dialog.setContentView(binding.root)
         dialog.setCanceledOnTouchOutside(false)
 
         binding.apply {
+            if (title.isEmpty() || title.isBlank()) {
+                tvTitle.gone()
+            }
             viewDialog.setBackgroundResource(background)
             viewDialog.changeBackgroundColor(backgroundColor)
             tvTitle.text = title
             tvMessage.text = msg
             btnRight.text = titleRightButton
             btnLeft.text = titleLeftButton
-            btnRight.textColor(colorRightButton)
-            btnLeft.textColor(colorLeftButton)
+            btnRight.textColor(textColorRightButton)
+            btnLeft.textColor(textColorLeftButton)
+            btnRight.setBackgroundResource(bgRightButton)
+            btnLeft.setBackgroundResource(bgLeftButton)
             btnLeft.setOnClickListener { callback(false, dialog) }
             btnRight.setOnClickListener { callback(true, dialog) }
 
@@ -50,8 +75,10 @@ import com.codegenetics.extensions.lib.databinding.*
 
     }
 
-
-    fun Activity.showTwoButtonModernDialog(
+/** Two Buttons vertically aligned
+ * Positive button will be filled
+ * cancel button will be Text Simple*/
+fun Activity.showTwoButtonModernDialog(
         title: String = "",
         msg: String,
         titlePositive: String = "OK",
@@ -62,9 +89,10 @@ import com.codegenetics.extensions.lib.databinding.*
         @DrawableRes bgNegativeButton: Int = R.drawable.bg_transparent,
         @ColorRes backgroundColor:Int = R.color.background,
         @DrawableRes background:Int = R.drawable.dialog_layout,
+        @StyleRes theme: Int = R.style.AppDialog,
         callback: (Boolean, Dialog) -> Unit
     ) {
-        val dialog = Dialog(this)
+    val dialog = Dialog(this, theme)
         val binding = ViewDialogTwoButtonModernBinding.inflate(dialog.layoutInflater)
         dialog.setContentView(binding.root)
         dialog.setCanceledOnTouchOutside(true)
@@ -91,8 +119,10 @@ import com.codegenetics.extensions.lib.databinding.*
 
     }
 
-
-    fun Activity.showTwoButtonModernDialogNoTitleVertical(
+/** No Title
+ * Message Aligned on left side
+ * two button Horizontal*/
+fun Activity.showTwoButtonModernDialogNoTitleVertical(
         msg: String,
         titlePositive: String = "OK",
         titleNegative: String = "Cancel",
@@ -100,16 +130,22 @@ import com.codegenetics.extensions.lib.databinding.*
         @ColorRes textColorNegativeButton: Int = R.color.white,
         @DrawableRes bgPositiveButton: Int = R.drawable.primary_bg,
         @DrawableRes bgNegativeButton: Int = R.drawable.bg_red,
+        @StyleRes theme: Int = R.style.AppDialog,
+        shouldShowCloseButton: Boolean = false,
         callback: (Boolean, Dialog) -> Unit
     ) {
-        val dialog = Dialog(this, R.style.AppDialog)
+    val dialog = Dialog(this, theme)
         val binding = ViewDialogTwoButtonModernNoTitleVerticalBinding.inflate(dialog.layoutInflater)
         dialog.setContentView(binding.root)
         dialog.setCanceledOnTouchOutside(true)
 
 
         binding.apply {
-
+            if (shouldShowCloseButton) {
+                ivClose.show()
+            } else {
+                ivClose.hide()
+            }
             tvTitle.text = msg
 
             if (titlePositive.isNotEmptyAndBlank()) {
@@ -143,8 +179,8 @@ import com.codegenetics.extensions.lib.databinding.*
     }
 
 
-
-    fun Activity.showTwoButtonModernDialogNoTitleHorizontal(
+@Deprecated("You can use [showTwoButtonDialog] with Customization")
+fun Activity.showTwoButtonModernDialogNoTitleHorizontal(
         msg: String ,
         titlePositive: String = "OK",
         titleNegative: String = "Cancel",
@@ -152,9 +188,11 @@ import com.codegenetics.extensions.lib.databinding.*
         @ColorRes textColorNegativeButton: Int = R.color.white,
         @DrawableRes bgPositiveButton: Int = R.drawable.primary_bg,
         @DrawableRes bgNegativeButton: Int = R.drawable.bg_red,
+        @StyleRes theme: Int = R.style.AppDialog,
+        shouldShowCloseButton: Boolean = false,
         callback: (Boolean, Dialog) -> Unit
     ) {
-        val dialog = Dialog(this, R.style.AppDialog)
+    val dialog = Dialog(this, theme)
         val binding =
             ViewDialogTwoButtonModernNoTitleHorizontalBinding.inflate(dialog.layoutInflater)
         dialog.setContentView(binding.root)
@@ -162,6 +200,11 @@ import com.codegenetics.extensions.lib.databinding.*
 
 
         binding.apply {
+            if (shouldShowCloseButton) {
+                ivClose.show()
+            } else {
+                ivClose.hide()
+            }
             tvTitle.text = msg
             btnPositive.text = titlePositive
             btnNegative.text = titleNegative
@@ -181,12 +224,13 @@ import com.codegenetics.extensions.lib.databinding.*
 
     }
 
-
-    fun Activity.showOneButtonDialog(
+/** Simple One Button Dialog
+ * default button is Text*/
+fun Activity.showOneButtonDialog(
         title: String = "",
         msg: String,
         titleButton: String = "OK",
-        @ColorRes colorButton: Int = R.color.colorPrimary,
+        @ColorRes btnTextColor: Int = R.color.colorPrimary,
         @DrawableRes btnDrawable: Int = R.drawable.bg_transparent,
         @ColorRes backgroundColor:Int = R.color.background,
         @DrawableRes background:Int = R.drawable.dialog_layout,
@@ -213,7 +257,7 @@ import com.codegenetics.extensions.lib.databinding.*
             }
 
             btnOk.text = titleButton
-            btnOk.textColor(colorButton)
+            btnOk.textColor(btnTextColor)
             btnOk.setBackgroundResource(btnDrawable)
             btnOk.setOnClickListener { callback(dialog) }
         }
@@ -227,18 +271,19 @@ import com.codegenetics.extensions.lib.databinding.*
         return dialog
     }
 
-    fun Activity.showDialogWithImage(
+fun Activity.showDialogWithImage(
         title: String = "",
         msg: String = "",
         titleButton: String = "",
-        @DrawableRes icon: Int = 0,
+        icon: Any = 0,
         @ColorRes colorButton: Int = R.color.colorPrimary,
         @DrawableRes btnDrawable: Int = R.drawable.bg_transparent,
         @ColorRes backgroundColor:Int = R.color.background,
         @DrawableRes background:Int = R.drawable.dialog_layout,
+        @StyleRes theme: Int = R.style.AppDialog,
         callback: (Dialog) -> Unit
     ) {
-        val dialog = Dialog(this)
+    val dialog = Dialog(this, theme)
         val binding = DialogWithIconBinding.inflate(dialog.layoutInflater)
         dialog.setContentView(binding.root)
         dialog.setCanceledOnTouchOutside(false)

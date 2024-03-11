@@ -5,11 +5,18 @@
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_gravity="center"
-    android:background="@drawable/dialog_layout"
     android:orientation="vertical"
     android:layout_margin="@dimen/_10sdp"
     android:translationZ="@dimen/_3sdp"
-    android:id="@+id/view_dialog">
+    android:background="@android:color/transparent">
+
+    <LinearLayout
+        android:id="@+id/view_dialog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/dialog_layout">
+
 
 
 
@@ -65,4 +72,6 @@
             android:textSize="@dimen/_12ssp" />
 
     </LinearLayout>
+
+</LinearLayout>
 
