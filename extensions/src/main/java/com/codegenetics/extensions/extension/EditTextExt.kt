@@ -3,6 +3,7 @@ package com.codegenetics.extensions.extension
 import android.text.InputFilter
 import android.view.KeyEvent
 import android.widget.EditText
+import android.widget.TextView
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -56,4 +57,23 @@ fun Any.isNotEmptyAndBlank(): Boolean {
 
 fun EditText.clear() {
     this.setText("")
+}
+
+/**
+ * Extension method to set a drawable to the left of a TextView.
+ */
+fun EditText.setDrawableLeft(drawable: Int) {
+    this.setCompoundDrawablesWithIntrinsicBounds(drawable, 0, 0, 0)
+}
+
+fun EditText.setDrawableRight(drawable: Int) {
+    this.setCompoundDrawablesWithIntrinsicBounds(0, 0, drawable, 0)
+}
+
+fun EditText.setDrawableTop(drawable: Int) {
+    this.setCompoundDrawablesWithIntrinsicBounds(0, drawable, 0, 0)
+}
+
+fun EditText.setDrawableBottom(drawable: Int) {
+    this.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, drawable)
 }

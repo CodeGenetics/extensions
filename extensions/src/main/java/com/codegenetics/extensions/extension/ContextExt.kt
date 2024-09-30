@@ -25,13 +25,13 @@ import android.os.*
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import androidx.annotation.*
-import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -44,15 +44,14 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
+import com.codegenetics.extensions.colorCache
+import com.codegenetics.extensions.drawableCache
 import com.codegenetics.extensions.lib.R
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.io.File
 import java.util.*
 
@@ -200,15 +199,37 @@ fun Context.sendFeedback(email: String, appName: String = "") {
     }
 }
 
+/** Opens Email Intent*/
+fun Context.openEmailApp(title: String, body: String, recipient: String = "") {
+    val intent = Intent(Intent.ACTION_SENDTO).apply {
+        data = Uri.parse("mailto:$recipient")
+        putExtra(Intent.EXTRA_SUBJECT, title)
+        putExtra(Intent.EXTRA_TEXT, body)
+    }
+    // Check if there is an app that can handle this intent
+    if (intent.resolveActivity(packageManager) != null) {
+        startActivity(intent)
+    } else {
+        // Handle the case where no email app is available
+        // You could show a Toast or a Snackbar, for example
+        toast("No email app found")
+    }
+}
+
 /** Opens App in play store with package name
  * that you provide in params */
-fun Context.openPlayStore(packageName: String) {
+fun Context.openPlayStore(packageName: String = this.packageName) {
     try {
-        val uri = Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
-        val intent = Intent(ACTION_VIEW, uri)
-        startActivity(intent)
-    } catch (ex: Exception) {
-        ex.printStackTrace()
+        // Try to open the Play Store app directly
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=$packageName")))
+    } catch (e: Exception) {
+        // If Play Store app is not available, open in a browser
+        startActivity(
+            Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=$packageName")
+            )
+        )
     }
 }
 
@@ -233,14 +254,15 @@ fun Context.color(@ColorRes res: Int): Int {
     return ContextCompat.getColor(this, res)
 }
 
+
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP_MR1)
 fun Context.shareText(title:String="Share", text: String="", receiver: Intent) {
     try {
-            val intent = Intent(Intent.ACTION_SEND)
+        val intent = Intent(ACTION_SEND)
             intent.type = "text/plain"
-            intent.putExtra(Intent.EXTRA_SUBJECT, text)
+        intent.putExtra(EXTRA_SUBJECT, text)
             val shareMsg = text.trim { it <= ' ' }
-            intent.putExtra(Intent.EXTRA_TEXT, shareMsg)
+        intent.putExtra(EXTRA_TEXT, shareMsg)
             val pendingIntent = PendingIntent.getBroadcast(
                 this@shareText, 0,
                 receiver, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -253,6 +275,26 @@ fun Context.shareText(title:String="Share", text: String="", receiver: Intent) {
                 )
             )
     } catch (e: java.lang.Exception) {
+        e.printStackTrace()
+    }
+}
+
+
+fun Context.shareText(title: String = "Share", text: String = "") {
+    try {
+        val intent = Intent(ACTION_SEND)
+        intent.type = "text/plain"
+        intent.putExtra(EXTRA_SUBJECT, text)
+        val shareMsg = text.trim { it <= ' ' }
+        intent.putExtra(EXTRA_TEXT, shareMsg)
+
+        startActivity(
+            createChooser(
+                intent,
+                title,
+            )
+        )
+    } catch (e: Exception) {
         e.printStackTrace()
     }
 }
@@ -496,7 +538,7 @@ fun Context.getDrawable(
                     dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
-                    callback(resource!!)
+                    callback(resource)
                     return true
                 }
 
@@ -532,7 +574,7 @@ fun Context.getDrawable(
                     dataSource: DataSource,
                     isFirstResource: Boolean
                 ): Boolean {
-                    callback(resource!!)
+                    callback(resource)
                     return true
                 }
 
@@ -818,8 +860,8 @@ fun Context.navigateToNotificationSettings() {
 
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
             intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-            intent.addCategory(Intent.CATEGORY_DEFAULT)
-            intent.data = android.net.Uri.parse("package:$packageName")
+            intent.addCategory(CATEGORY_DEFAULT)
+            intent.data = Uri.parse("package:$packageName")
         }
 
         else -> {
@@ -830,7 +872,7 @@ fun Context.navigateToNotificationSettings() {
         startActivity(intent)
     } else {
         intent.action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
-        intent.data = android.net.Uri.fromParts("package", packageName, null)
+        intent.data = Uri.fromParts("package", packageName, null)
         startActivity(intent)
     }
 }
@@ -1017,6 +1059,76 @@ fun Context.isNotificationPermissionGranted(): Boolean {
     return isPermissionGranted(Manifest.permission.POST_NOTIFICATIONS)
 }
 
+/** Extension to fetch color from attribute with caching*/
+fun Context.colorFromAttr(@AttrRes attrResId: Int): Int {
+    try {
+        return colorCache.get(attrResId) ?: run {
+            val typedValue = TypedValue()
+            if (theme.resolveAttribute(attrResId, typedValue, true)) {
+                val color = typedValue.data
+                colorCache.put(attrResId, color)
+                color
+            } else {
+                return 0
+            }
+        }
+    } catch (e: Exception) {
+        return 0
+    }
+}
+
+// Extension to fetch drawable from attribute with caching
+fun Context.drawableFromAttr(@AttrRes attrResId: Int): Drawable? {
+    try {
+        return drawableCache.get(attrResId) ?: run {
+            val typedValue = TypedValue()
+            if (theme.resolveAttribute(attrResId, typedValue, true)) {
+                val drawable = ContextCompat.getDrawable(this, typedValue.resourceId)
+                if (drawable != null) {
+                    drawableCache.put(attrResId, drawable)
+                }
+                drawable
+            } else {
+                null
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        return null
+    }
+}
+
+fun Context.getScreenSizeInDp(): Pair<Int, Int> {
+    val metrics = this.resources.displayMetrics
+    val widthDp = metrics.widthPixels / metrics.density
+    val heightDp = metrics.heightPixels / metrics.density
+    return Pair(widthDp.toInt(), heightDp.toInt())
+}
+
+inline fun <reified T : Activity> Context.openActivityWithAnimation(
+    intentBody: Intent.() -> Unit
+) {
+    val enterAnim = R.anim.slide_in_left
+    val exitAnim = R.anim.slide_out_left
+    val intent = Intent(this, T::class.java)
+    intent.intentBody()
+    val bundle = ActivityOptionsCompat.makeCustomAnimation(this, enterAnim, exitAnim).toBundle()
+    ContextCompat.startActivity(this, intent, bundle)
+}
+
+fun Context.isDarkModeEnabled(): Boolean {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        // For Android 10 (API level 29) and above
+        val uiModeManager = this.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+        uiModeManager.nightMode == UiModeManager.MODE_NIGHT_YES
+    } else {
+        // For below Android 10
+        val currentNightMode =
+            this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        currentNightMode == Configuration.UI_MODE_NIGHT_YES
+    }
+}
+
 /*************************************************************
  *******************DEPRECATED METHODS************************
  *************************************************************/
@@ -1034,3 +1146,4 @@ fun Context.getColor(@ColorRes id: Int) = ContextCompat.getColor(this, id)
  */
 @Deprecated("Use getDrawableResource", ReplaceWith("getDrawableResource"))
 fun Context.getDrawable(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
+

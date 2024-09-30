@@ -1,11 +1,13 @@
 package com.codegenetics.extensions.extension
 
 import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.GradientDrawable
@@ -21,9 +23,11 @@ import android.view.animation.CycleInterpolator
 import android.view.animation.LinearInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.AnimRes
+import androidx.annotation.AttrRes
 import androidx.annotation.ColorRes
 import androidx.annotation.IdRes
 import androidx.annotation.StringRes
+import androidx.appcompat.widget.SwitchCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.marginBottom
 import androidx.core.view.marginLeft
@@ -31,6 +35,7 @@ import androidx.core.view.marginRight
 import androidx.core.view.marginTop
 import androidx.databinding.DataBindingUtil
 import androidx.databinding.ViewDataBinding
+import androidx.transition.TransitionManager
 import com.codegenetics.extensions.delay
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
@@ -190,9 +195,18 @@ fun View.backgroundColor(@ColorRes colorId: Int) {
     setBackgroundColor(ContextCompat.getColor(context, colorId))
 }
 
+@Deprecated("use [click] instead")
+fun View.setSmartClickListener(callback: (View) -> Unit) {
+    this.setOnClickListener {
+        isEnabled = false
+        callback(this)
+        delay(300) { isEnabled = true }
+    }
+}
+
 /** click listener with a delay of 300 ms
  * to avoid accidental double click*/
-fun View.setSmartClickListener(callback: (View) -> Unit) {
+fun View.smartClick(callback: (View) -> Unit) {
     this.setOnClickListener {
         isEnabled = false
         callback(this)
@@ -365,7 +379,7 @@ fun View.gotoSettingsWithSnackBar() {
     Snackbar.make(
         this,
         "Above permission(s) needed. Please allow in your application settings.",
-        BaseTransientBottomBar.LENGTH_INDEFINITE
+        Snackbar.LENGTH_INDEFINITE
     ).setAction("Settings") {
         val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
         val uri = Uri.fromParts("package", context.packageName, null)
@@ -382,12 +396,12 @@ fun View.showSnackBar(snackbarText: String, timeLength: Int) {
 }
 
 fun View.showSnackBar(msg: String) {
-    Snackbar.make(this, msg, BaseTransientBottomBar.LENGTH_LONG).show()
+    Snackbar.make(this, msg, Snackbar.LENGTH_LONG).show()
 }
 
 fun View.showSnackBar(@StringRes msg: Int) {
     Snackbar.make(
-        this, msg, BaseTransientBottomBar.LENGTH_LONG
+        this, msg, Snackbar.LENGTH_LONG
     ).show()
 }
 
@@ -461,13 +475,13 @@ fun View.getBitmap(): Bitmap {
 /**
  * Show a snackbar with [message]
  */
-fun View.snack(message: String, length: Int = BaseTransientBottomBar.LENGTH_LONG) =
+fun View.snack(message: String, length: Int = Snackbar.LENGTH_LONG) =
     snack(message, length) {}
 
 /**
  * Show a snackbar with [messageRes]
  */
-fun View.snack(@StringRes messageRes: Int, length: Int = BaseTransientBottomBar.LENGTH_LONG) =
+fun View.snack(@StringRes messageRes: Int, length: Int = Snackbar.LENGTH_LONG) =
     snack(messageRes, length) {}
 
 /**
@@ -475,7 +489,7 @@ fun View.snack(@StringRes messageRes: Int, length: Int = BaseTransientBottomBar.
  */
 inline fun View.snack(
     message: String,
-    @Snackbar.Duration length: Int = BaseTransientBottomBar.LENGTH_LONG,
+    @Snackbar.Duration length: Int = Snackbar.LENGTH_LONG,
     f: Snackbar.() -> Unit
 ) {
     val snack = Snackbar.make(this, message, length)
@@ -488,7 +502,7 @@ inline fun View.snack(
  */
 inline fun View.snack(
     @StringRes messageRes: Int,
-    @Snackbar.Duration length: Int = BaseTransientBottomBar.LENGTH_LONG,
+    @Snackbar.Duration length: Int = Snackbar.LENGTH_LONG,
     f: Snackbar.() -> Unit
 ) {
     val snack = Snackbar.make(this, messageRes, length)
@@ -557,6 +571,50 @@ fun ViewGroup.removeViewsByTag(tag: String) {
             removeView(child)
         }
     }
+}
+
+/** set background color for view from attrs*/
+fun View.backgroundColorAttr(@AttrRes attrResId: Int) {
+    this.setBackgroundColor(this.context.colorFromAttr(attrResId))
+}
+/** set background drawable for view from attrs*/
+fun View.backgroundDrawableAttr(@AttrRes attrResId: Int) {
+    this.background = this.context.drawableFromAttr(attrResId)
+}
+
+/** show a view with fade in animation*/
+fun View.fadeIn() {
+    this.apply {
+        alpha = 0f
+        visibility = View.VISIBLE
+        animate()
+            .alpha(1f)
+            .setDuration(300)
+            .setListener(null)
+    }
+}
+
+/** hide a view with fade out animation*/
+fun View.fadeOut() {
+    this.animate()
+        .alpha(0f)
+        .setDuration(300)
+        .setListener(object : AnimatorListenerAdapter() {
+            override fun onAnimationEnd(animation: Animator) {
+                visibility = View.GONE
+            }
+        })
+}
+
+/** animate changes in view*/
+fun ViewGroup.animateChanges() {
+    TransitionManager.beginDelayedTransition(this)
+}
+
+
+fun SwitchCompat.setThumbTint(color: Int) {
+    val switchThumbTint = ColorStateList.valueOf(color)
+    this.thumbTintList = switchThumbTint
 }
 
 

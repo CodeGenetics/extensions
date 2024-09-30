@@ -242,3 +242,58 @@ fun String.toCamelCaseWithSpaces(): String {
 fun String?.isNotNullEmptyBlank(): Boolean {
     return this != null && this.isNotEmptyAndBlank()
 }
+
+fun String.capitalizeFirstLetter(): String {
+    if (this.isEmpty()) return ""
+    return this[0].uppercaseChar() + this.substring(1)
+}
+fun String.capitalizeFirstLetterAndAfterSpace(): String {
+    var result = ""
+    var capitalizeNext = true  // Start with true to capitalize the first letter
+
+    for (char in this) {
+        result += if (capitalizeNext && char.isLetter()) {
+            capitalizeNext = false
+            char.uppercaseChar()
+        } else {
+            if (char.isWhitespace()) capitalizeNext = true
+            char
+        }
+    }
+
+    return result
+}
+
+fun String.toCapitalize(): String {
+    return this.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.ROOT
+        ) else it.toString()
+    }
+}
+
+fun String.toColorByRGB(str: String): Int {
+    val s = str.uppercase()
+    return try {
+        Color.parseColor(s)
+    } catch (e: IllegalArgumentException) {
+        // Check if the string is a valid 6-digit hex color code
+        if (s.matches("^#([0-9a-fA-F]{6})$".toRegex())) {
+            Color.parseColor("#FF$s")
+        } else {
+            // Check if the string is a valid 3-digit hex color code
+            if (s.matches("^#([0-9a-fA-F]{3})$".toRegex())) {
+                val r = s[1].toString() + s[1].toString()
+                val g = s[2].toString() + s[2].toString()
+                val b = s[3].toString() + s[3].toString()
+                Color.parseColor("#FF$r$g$b")
+            } else {
+                // Return a default color if the string is not a valid color code
+                return "${s}0".toColor()
+            }
+        }
+    } catch (e: Exception) {
+        // Return a default color if an exception is thrown
+        0
+    }
+}

@@ -1,6 +1,7 @@
 package com.codegenetics.extensions
 
 import android.graphics.Bitmap
+import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.media.MediaMetadataRetriever
@@ -14,17 +15,31 @@ import android.text.Spanned
 import android.util.Log
 import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.annotation.RequiresApi
+import androidx.collection.LruCache
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
-import kotlinx.coroutines.NonCancellable.start
 import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.*
+import java.util.Calendar
+import java.util.Date
+import java.util.GregorianCalendar
+import java.util.Locale
+import java.util.Random
+import java.util.TimeZone
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+
+internal val colorCache = LruCache<Int, Int>(50)  // Cache size can be adjusted based on needs
+internal val drawableCache = LruCache<Int, Drawable?>(50)
+
+fun clearLruCache() {
+    colorCache.evictAll()
+    drawableCache.evictAll()
+}
 
 fun delay(time: Long = 500L, runnable: Runnable): Handler {
     val handler = Handler(Looper.getMainLooper())
@@ -359,4 +374,8 @@ fun startTimer(
     }.apply {
         start()
     }
+}
+
+fun getTimeZone(): String {
+    return TimeZone.getDefault().id
 }

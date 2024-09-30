@@ -5,13 +5,13 @@ plugins {
 }
 
 ext{
-    versionCode = 33
-    versionName = "2.1.4"
+    versionCode = 34
+    versionName = "2.1.5"
 }
 
 android {
     namespace 'com.codegenetics.extensions.lib'
-    compileSdk 33
+    compileSdk 34
 
     buildFeatures {
         viewBinding true
@@ -19,7 +19,7 @@ android {
 
     defaultConfig {
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode versionCode
         versionName versionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

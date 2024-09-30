@@ -1,5 +1,7 @@
 package com.codegenetics.extensions.extension
 
+import android.animation.ObjectAnimator
+import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -21,4 +23,12 @@ fun ImageView.loadImageWithBlurEffect(image: Any) {
         .apply(RequestOptions().override(10).centerCrop())
         .diskCacheStrategy(DiskCacheStrategy.ALL)
         .into(this)
+}
+
+fun ImageView.rotate() {
+    val animator = ObjectAnimator.ofFloat(this, "rotation", 0f, 360f)
+    animator.duration = 1000
+    animator.repeatCount = ObjectAnimator.INFINITE
+    animator.interpolator = LinearInterpolator()
+    animator.start()
 }

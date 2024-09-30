@@ -23,6 +23,7 @@ import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.codegenetics.extensions.lib.R
 import kotlinx.coroutines.CoroutineScope
@@ -255,4 +256,17 @@ fun AppCompatActivity.launchMain(block: suspend CoroutineScope.() -> Unit): Job 
  * attached with lifecycle*/
 fun AppCompatActivity.launchIO(block: suspend CoroutineScope.() -> Unit): Job {
     return launchDefault(Dispatchers.IO, block = block)
+}
+
+fun Activity.isValidLifeCycle(fragmentManager: FragmentManager): Boolean =
+    !this.isFinishing && fragmentManager.isDestroyed.not()
+
+fun Activity.finishToDown() {
+    this.finish()
+    this.overridePendingTransition(0, R.anim.slide_out_down)
+}
+
+fun Activity.finishAffinityToDown() {
+    this.finishAffinity()
+    this.overridePendingTransition(0, R.anim.slide_out_down)
 }
