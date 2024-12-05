@@ -26,9 +26,13 @@ fun Any.twoDecimal(): String {
     return df.format(this.toString().toDouble())
 }
 
+/**
+ * Parses the object to a Double.
+ * @return Double value of the object, or 0.0 if parsing fails.
+ */
 fun Any.parseDouble(): Double {
     return try {
-        if (this.isNotEmptyAndBlank()) {
+        if (this.toString().isNotBlank()) {
             this.toString().toDouble()
         } else {
             0.0
@@ -39,9 +43,13 @@ fun Any.parseDouble(): Double {
     }
 }
 
+/**
+ * Parses the object to an Int.
+ * @return Int value of the object, or 0 if parsing fails.
+ */
 fun Any.parseInt(): Int {
     return try {
-        if (this.isNotEmptyAndBlank()) {
+        if (this.toString().isNotBlank()) {
             this.toString().toInt()
         } else {
             0
@@ -54,27 +62,38 @@ fun Any.parseInt(): Int {
 
 
 
-fun Any.roundUpToTwoDecimalsWithoutRounding(): String? {
+/**
+ * Formats the number to two decimal places without rounding up.
+ * @return String representation of the number formatted to two decimal places without rounding.
+ */
+fun Any.roundUpToTwoDecimalsWithoutRounding(): String {
     val df = DecimalFormat("#.##")
     df.roundingMode = RoundingMode.FLOOR
     return df.format(this.toString().toDouble())
 }
 
+
 /**
  * Extension method to int time to 2 digit String
  */
-fun Int.twoDigitTime() = if (this < 10) "0" + toString() else toString()
+/**
+ * Formats the integer as a two-digit time string (e.g., "01" for 1).
+ * @return String representation of the integer with leading zero if necessary.
+ */
+fun Int.twoDigitTime() = if (this < 10) "0$this" else this.toString()
 
 /**
- * Extension method to replace all text inside an [Editable] with the specified [newValue].
+ * Replaces all text in an [Editable] with the specified [newValue].
+ * @param newValue The new text to replace the existing text.
  */
 fun Editable.replaceAll(newValue: String) {
     replace(0, length, newValue)
 }
 
+
 /**
- * Extension method to replace all text inside an [Editable] with the specified [newValue] while
- * ignoring any [android.text.InputFilter] set on the [Editable].
+ * Replaces all text in an [Editable] with the specified [newValue], ignoring any filters.
+ * @param newValue The new text to replace the existing text.
  */
 fun Editable.replaceAllIgnoreFilters(newValue: String) {
     val currentFilters = filters
@@ -84,7 +103,10 @@ fun Editable.replaceAllIgnoreFilters(newValue: String) {
 }
 
 /**
- * Extension method to get ClickableSpan.
+ * Creates a clickable span with the specified color and action.
+ * @param color The text color for the clickable span.
+ * @param action The action to perform when the span is clicked.
+ * @return A [ClickableSpan] instance.
  * e.g.
  * val loginLink = getClickableSpan(context.getColorCompat(R.color.colorAccent), { })
  */
@@ -136,7 +158,10 @@ inline fun SharedPreferences.edit(preferApply: Boolean = false, f: SharedPrefere
 
 
 /**
- * Extension method to check is aboveApi.
+ * Executes a block if the device's API level is above the specified version.
+ * @param api The API level to compare against.
+ * @param included Whether to include the specified API level in the condition. Defaults to false.
+ * @param block The block to execute if the condition is met.
  */
 inline fun aboveApi(api: Int, included: Boolean = false, block: () -> Unit) {
     if (Build.VERSION.SDK_INT > if (included) api - 1 else api) {
@@ -145,7 +170,10 @@ inline fun aboveApi(api: Int, included: Boolean = false, block: () -> Unit) {
 }
 
 /**
- * Extension method to check is belowApi.
+ * Executes a block if the device's API level is below the specified version.
+ * @param api The API level to compare against.
+ * @param included Whether to include the specified API level in the condition. Defaults to false.
+ * @param block The block to execute if the condition is met.
  */
 inline fun belowApi(api: Int, included: Boolean = false, block: () -> Unit) {
     if (Build.VERSION.SDK_INT < if (included) api + 1 else api) {
@@ -153,15 +181,18 @@ inline fun belowApi(api: Int, included: Boolean = false, block: () -> Unit) {
     }
 }
 
+
 /**
- * Extension method check if is Main Thread.
+ * Checks if the current thread is the main (UI) thread.
+ * @return True if the current thread is the main thread, false otherwise.
  */
 fun isMainThread(): Boolean = Looper.myLooper() == Looper.getMainLooper()
 
 /**
- * Extension method to get the TAG name for all object
+ * Retrieves the TAG name of the class for logging purposes.
+ * @return The simple name of the class.
  */
-fun <T : Any> T.TAG() = this::class.simpleName
+fun <T : Any> T.TAG(): String = this::class.simpleName ?: "Unknown"
 
 /**
  * Convert a given date to milliseconds

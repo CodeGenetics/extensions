@@ -14,6 +14,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
+/**
+ * Checks if the [Fragment] is currently attached and its associated [Activity] is alive.
+ * Executes the given [callback] with the [Activity] if the Fragment is in a valid state.
+ */
 fun Fragment.isAlive(callback: (Activity) -> Unit) {
     if (activity != null && isAdded && !isDetached) {
         activity?.let { it.isActivityAlive { activity -> callback(activity) } }
@@ -75,22 +79,33 @@ fun Fragment.hideSoftKeyboard() {
     activity?.hideSoftKeyboard()
 }
 
-/** Directly call launch from activity for Coroutine Default
- * attached with lifecycle*/
+/**
+ * Launches a coroutine with the [Dispatchers.Default] context attached to the Fragment's lifecycle.
+ * @param context The coroutine context. Default is [Dispatchers.Default].
+ * @param block The suspend function to execute.
+ * @return The [Job] representing the coroutine.
+ */
 fun Fragment.launchDefault(
     context: CoroutineContext = Dispatchers.Default,
     block: suspend CoroutineScope.() -> Unit
 ): Job {
     return lifecycleScope.launch(context = context, block = block)
 }
-/** Directly call launch from activity for Coroutine Main
- * attached with lifecycle*/
+
+/**
+ * Launches a coroutine with the [Dispatchers.Main] context attached to the Fragment's lifecycle.
+ * @param block The suspend function to execute.
+ * @return The [Job] representing the coroutine.
+ */
 fun Fragment.launchMain(block: suspend CoroutineScope.() -> Unit): Job {
     return launchDefault(context = Dispatchers.Main, block = block)
 }
 
-/** Directly call launch from fragment for Coroutine IO
- * attached with lifecycle*/
+/**
+ * Launches a coroutine with the [Dispatchers.IO] context attached to the Fragment's lifecycle.
+ * @param block The suspend function to execute.
+ * @return The [Job] representing the coroutine.
+ */
 fun Fragment.launchIO(block: suspend CoroutineScope.() -> Unit): Job {
     return launchDefault(context = Dispatchers.IO, block = block)
 }

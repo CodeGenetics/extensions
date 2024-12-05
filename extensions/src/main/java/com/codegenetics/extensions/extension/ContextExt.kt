@@ -46,13 +46,21 @@ import com.bumptech.glide.request.target.Target
 import com.bumptech.glide.request.transition.Transition
 import com.codegenetics.extensions.colorCache
 import com.codegenetics.extensions.drawableCache
+import com.codegenetics.extensions.helper.Logs
 import com.codegenetics.extensions.lib.R
+import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException
+import com.google.android.gms.common.GooglePlayServicesRepairableException
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.IOException
 import java.util.*
 
 fun Context.getScreenWidth(percent: Double): Int {
@@ -61,6 +69,13 @@ fun Context.getScreenWidth(percent: Double): Int {
 
 fun Context.getScreenHeight(percent: Double): Int {
     return (this.resources.displayMetrics.heightPixels * (percent / 100)).toInt()
+}
+
+fun Context.getScreenDimension(percentWidth: Double, percentHeight: Double): Pair<Int, Int> {
+    val metrics = resources.displayMetrics
+    val width = (metrics.widthPixels * (percentWidth / 100)).toInt()
+    val height = (metrics.heightPixels * (percentHeight / 100)).toInt()
+    return Pair(width, height)
 }
 
 fun Context.toast(message: String) =
@@ -102,11 +117,15 @@ fun Context?.isValidContext(): Boolean {
     }
 }
 
+
+
 inline fun <reified T : Any> Context.openActivity(vararg params: Pair<String, Any?>) {
     val intent = Intent(this, T::class.java)
     if (params.isNotEmpty()) fillIntentArguments(intent, params)
     startActivity(intent)
 }
+
+
 
 inline fun <reified T : Any> Context.getActivityIntent(vararg params: Pair<String, Any?>): Intent {
     val intent = Intent(this, T::class.java)
@@ -149,27 +168,13 @@ fun fillIntentArguments(intent: Intent, params: Array<out Pair<String, Any?>>) {
 }
 
 fun Context.isInternetConnected(): Boolean {
-    val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-
-    // For 29 api or above
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-        val capabilities =
-            connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
-                ?: return false
-        return when {
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
-            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
-            else -> false
-        }
+    val connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
+            ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) ?: false
+    } else {
+        connectivityManager.activeNetworkInfo?.isConnected ?: false
     }
-    // For below 29 api
-    else {
-        if (connectivityManager.activeNetworkInfo != null && connectivityManager.activeNetworkInfo!!.isConnectedOrConnecting) {
-            return true
-        }
-    }
-    return false
 }
 
 fun Context.getStringResourceByName(resName: String?): String {
@@ -945,6 +950,24 @@ fun Context.share(text: String, subject: String = ""): Boolean {
     }
 }
 
+fun Context.shareContent(content: String, subject: String = "", filePath: String? = null) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = if (filePath != null) "*/*" else "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+        putExtra(Intent.EXTRA_TEXT, content)
+        filePath?.let {
+            val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                FileProvider.getUriForFile(this@shareContent, packageName, File(it))
+            } else {
+                Uri.fromFile(File(it))
+            }
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+    }
+    startActivity(Intent.createChooser(intent, "Share via"))
+}
+
 /**
  * Extension method to make call for Context.
  */
@@ -1126,6 +1149,25 @@ fun Context.isDarkModeEnabled(): Boolean {
         val currentNightMode =
             this.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         currentNightMode == Configuration.UI_MODE_NIGHT_YES
+    }
+}
+
+fun Context.printAdvertisingId() {
+    CoroutineScope(Dispatchers.IO).launch {
+        val idInfo: AdvertisingIdClient.Info
+
+        try {
+            idInfo = AdvertisingIdClient.getAdvertisingIdInfo(this@printAdvertisingId)
+            val advertisingId = idInfo.id
+            Logs.e("AID", advertisingId.toString())
+            //do sth with the id
+        } catch (e: IOException) {
+            e.printStackTrace()
+        } catch (e: GooglePlayServicesNotAvailableException) {
+            e.printStackTrace()
+        } catch (e: GooglePlayServicesRepairableException) {
+            e.printStackTrace()
+        }
     }
 }
 

@@ -379,3 +379,24 @@ fun startTimer(
 fun getTimeZone(): String {
     return TimeZone.getDefault().id
 }
+
+/**
+ * Attempts to execute a block of code up to a given number of retries.
+ *
+ * @param times The maximum number of retries.
+ * @param block The block of code to execute.
+ * @return The result of the block if successful, or null if all retries fail.
+ */
+inline fun <T> retry(times: Int, block: () -> T): T? {
+    var attempt = 0
+    var result: T? = null
+    while (attempt < times) {
+        try {
+            result = block()
+            break
+        } catch (e: Exception) {
+            attempt++
+        }
+    }
+    return result
+}

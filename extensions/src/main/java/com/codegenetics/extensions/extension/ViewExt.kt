@@ -88,7 +88,6 @@ fun View.toggleVisibility(): View {
     return this
 }
 
-
 /**
  * Toggle a view's visibility i.e visible or gone
  */
@@ -109,29 +108,47 @@ fun View.disable() {
     this.isEnabled = false
 }
 
+/**
+ * Animates the view using the specified animation resource.
+ *
+ * @param animationId The resource ID of the animation to apply.
+ * @param duration The duration of the animation in milliseconds. Default is 500ms.
+ *
+ * Usage:
+ * ```kotlin
+ * myView.animateView(R.anim.fade_in, duration = 1000L)
+ * ```
+ */
 fun View.animateView(@AnimRes animationId: Int, duration: Long = 500L) {
-    val animation = AnimationUtils.loadAnimation(context, animationId)
-    animation.duration = duration
-    animation.setAnimationListener(object : Animation.AnimationListener {
-        override fun onAnimationStart(animation: Animation?) = Unit
-        override fun onAnimationRepeat(animation: Animation?) = Unit
-        override fun onAnimationEnd(animation: Animation?) {
-        }
-    })
-    startAnimation(animation)
+    AnimationUtils.loadAnimation(context, animationId)?.apply {
+        this.duration = duration
+        startAnimation(this)
+    }
 }
 
+/**
+ * Animates the view endlessly using a specified animation resource.
+ *
+ * @param animationId The resource ID of the animation to apply.
+ * @param duration The duration of one animation cycle in milliseconds. Default is 500ms.
+ *
+ * Usage:
+ * ```kotlin
+ * myView.animateViewEndless(R.anim.bounce)
+ * ```
+ */
 fun View.animateViewEndless(@AnimRes animationId: Int, duration: Long = 500L) {
-    val animation = AnimationUtils.loadAnimation(context, animationId)
-    animation.duration = duration
-    animation.setAnimationListener(object : Animation.AnimationListener {
-        override fun onAnimationStart(animation: Animation?) = Unit
-        override fun onAnimationRepeat(animation: Animation?) = Unit
-        override fun onAnimationEnd(animation: Animation?) {
-            animateViewEndless(animationId, duration)
-        }
-    })
-    startAnimation(animation)
+    AnimationUtils.loadAnimation(context, animationId)?.apply {
+        this.duration = duration
+        setAnimationListener(object : Animation.AnimationListener {
+            override fun onAnimationStart(animation: Animation?) = Unit
+            override fun onAnimationRepeat(animation: Animation?) = Unit
+            override fun onAnimationEnd(animation: Animation?) {
+                animateViewEndless(animationId, duration)
+            }
+        })
+        startAnimation(this)
+    }
 }
 
 fun View.animateFade(duration: Long = 500L) {
@@ -214,10 +231,24 @@ fun View.smartClick(callback: (View) -> Unit) {
     }
 }
 
+/**
+ * Sets margins for the view.
+ *
+ * @param left Left margin in pixels.
+ * @param right Right margin in pixels.
+ * @param top Top margin in pixels.
+ * @param bottom Bottom margin in pixels.
+ *
+ * Usage:
+ * ```kotlin
+ * myView.setMargin(16, 16, 8, 8)
+ * ```
+ */
 fun View.setMargin(left: Int, right: Int, top: Int, bottom: Int) {
-    val param = this.layoutParams as ViewGroup.MarginLayoutParams
-    param.setMargins(left, top, right, bottom)
-    this.layoutParams = param
+    (layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
+        setMargins(left, top, right, bottom)
+        layoutParams = this
+    }
 }
 
 fun View.setStartMargin(value: Int) = setMargin(value, marginRight, marginTop, marginBottom)
@@ -300,14 +331,20 @@ fun View.setWidth(value: Int) {
 }
 
 /**
- * Extension method to resize View with height & width.
+ * Resizes the view to the specified width and height.
+ *
+ * @param width The new width in pixels.
+ * @param height The new height in pixels.
+ *
+ * Usage:
+ * ```kotlin
+ * myView.resize(200, 400)
+ * ```
  */
 fun View.resize(width: Int, height: Int) {
-    val lp = layoutParams
-    lp?.let {
-        lp.width = width
-        lp.height = height
-        layoutParams = lp
+    layoutParams = layoutParams?.apply {
+        this.width = width
+        this.height = height
     }
 }
 

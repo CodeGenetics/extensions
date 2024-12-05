@@ -19,9 +19,11 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.ProgressBar
 import androidx.annotation.ColorRes
 import androidx.annotation.IdRes
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
@@ -44,6 +46,33 @@ fun Activity.isActivityAlive(callback: (Activity) -> Unit) {
     }
 }
 
+/**
+ * Sets the status bar color and adjusts the icon color (light/dark).
+ * @param colorId Resource ID of the desired color.
+ * @param iconColorType Specifies whether the status bar icons should be dark or light.
+ */
+fun Activity.setStatusBarColor(
+    @ColorRes colorId: Int,
+    iconColorType: StatusIconColorType = StatusIconColorType.Light
+) {
+    try {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            window.apply {
+                statusBarColor = ContextCompat.getColor(this@setStatusBarColor, colorId)
+                decorView.systemUiVisibility = when (iconColorType) {
+                    StatusIconColorType.Dark -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    StatusIconColorType.Light -> 0
+                }
+            }
+        } else {
+            window.statusBarColor = ContextCompat.getColor(this, colorId)
+        }
+    } catch (e: Exception) {
+        Log.e("StatusBarColor", "Error setting status bar color", e)
+    }
+}
+
+@Deprecated("Use statusBarColor instead")
 fun Activity.setStatusBarColor(@ColorRes colorId: Int) {
     try {
         window.decorView.systemUiVisibility =
@@ -57,63 +86,45 @@ fun Activity.setStatusBarColor(@ColorRes colorId: Int) {
     }
 }
 
-/** navigate you to the system setting of that app.
- * default @param[requestCode]=555
- * provide @param[requestCode] to get result in
- * onActivityResult*/
+/**
+ * Navigates to the app's settings page in the system settings.
+ * @param requestCode The request code for identifying the result in onActivityResult.
+ */
 fun Activity.navigateToSettings(requestCode: Int = 555) {
     try {
-        val dialogIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-        val uri = Uri.fromParts("package", packageName, null)
-        dialogIntent.data = uri
+        val dialogIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+        }
         startActivityForResult(dialogIntent, requestCode)
-    } catch (e: WindowManager.BadTokenException) {
-        e.printStackTrace()
+    } catch (e: Exception) {
+        Log.e("NavigateToSettings", "Error navigating to settings", e)
     }
 }
 
+/**
+ * Determines if the system theme is currently set to dark mode.
+ * @return True if the system theme is dark, false otherwise.
+ */
 fun Activity.isSystemThemeDark(): Boolean {
-    return when (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) {
-        Configuration.UI_MODE_NIGHT_NO -> false
-        Configuration.UI_MODE_NIGHT_YES -> true
-        else -> false
-    }
+    return (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
 }
 
-/** return Height of tha system Bottom Navigation */
+/**
+ * Retrieves the height of the navigation bar, if it is visible.
+ * @return The height of the navigation bar in pixels, or 0 if not visible.
+ */
+@RequiresApi(Build.VERSION_CODES.M)
 fun Activity.getNavHeight(): Int {
-    val decorView = this.window.decorView
-    var h = 0
-
-    val isNavigationBarShowing = decorView.height != this.windowManager.defaultDisplay.height
-
-    if (!isNavigationBarShowing) {
-        return 0
-    }
-
-    val resourceId = this.resources.getIdentifier("navigation_bar_height", "dimen", "android")
-    if (resourceId > 0) {
-        h = this.resources.getDimensionPixelSize(resourceId)
-    } else {
-        decorView.viewTreeObserver.addOnGlobalLayoutListener(object :
-            ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                decorView.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                val height = decorView.height
-                val displayMetrics = DisplayMetrics()
-                this@getNavHeight.windowManager.defaultDisplay.getMetrics(displayMetrics)
-                val screenHeight = displayMetrics.heightPixels
-                h = screenHeight - height
-            }
-        })
-    }
-    return h
+    val insets = WindowInsetsCompat.toWindowInsetsCompat(window.decorView.rootWindowInsets)
+    return insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
 }
+
 
 fun Activity.showProgressBar() {
     try {
         findViewById<ProgressBar>(R.id.pb)?.show()
     } catch (e: Exception) {
+        e.printStackTrace()
     }
 }
 
@@ -121,6 +132,7 @@ fun Activity.hideProgressBar() {
     try {
         findViewById<ProgressBar>(R.id.pb)?.gone()
     } catch (e: Exception) {
+        e.printStackTrace()
     }
 }
 
@@ -131,22 +143,24 @@ fun Activity.getScreenSize(): Pair<Int, Int> {
     return Pair(displayMetrics.widthPixels, displayMetrics.heightPixels)
 }
 
+/**
+ * Turns on the screen if it is currently off, using a wake lock.
+ */
+@SuppressLint("InvalidWakeLockTag")
 fun Activity.turnOnScreen() {
     try {
-        val pm = this.getSystemService(Context.POWER_SERVICE) as PowerManager
-        val isScreenOn = pm.isScreenOn
-        if (!isScreenOn) {
-            @SuppressLint("InvalidWakeLockTag") val wl = pm.newWakeLock(
+        val pm = getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (!pm.isInteractive) {
+            pm.newWakeLock(
                 PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP or PowerManager.ON_AFTER_RELEASE,
                 "MyLock"
-            )
-            wl.acquire(20000)
-            @SuppressLint("InvalidWakeLockTag") val wl_cpu =
-                pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyCpuLock")
-            wl_cpu.acquire(20000)
+            ).apply {
+                acquire(20000)
+                release()
+            }
         }
     } catch (ex: Exception) {
-        Log.e("TAG", "turnOnScreen: ", ex)
+        Log.e("TurnOnScreen", "Error turning on screen", ex)
     }
 }
 
@@ -157,36 +171,20 @@ enum class StatusIconColorType {
     Dark, Light
 }
 
-fun Activity.setStatusBarColor(
-    color: Int,
-    iconColorType: StatusIconColorType = StatusIconColorType.Light
-) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        this.window.apply {
-            clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
-            statusBarColor = color
-            decorView.systemUiVisibility = when (iconColorType) {
-                StatusIconColorType.Dark -> View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                StatusIconColorType.Light -> 0
-            }
-        }
-    } else
-        this.window.statusBarColor = color
-}
 
 /**
  * Extension method to provide hide keyboard for [Activity].
  */
 fun Activity.hideSoftKeyboard() {
-    if (currentFocus != null) {
-        val inputMethodManager = getSystemService(
-            Context
-                .INPUT_METHOD_SERVICE
-        ) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(currentFocus!!.windowToken, 0)
+    currentFocus?.let {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(it.windowToken, 0)
     }
 }
 
+@Deprecated("use addFragment instead",
+    ReplaceWith("replaceFragment")
+)
 /**
  * The `fragment` is added to the container view with id `frameId`. The operation is
  * performed by the `fragmentManager`.
@@ -197,6 +195,37 @@ fun AppCompatActivity.replaceFragmentInActivity(fragment: Fragment, @IdRes frame
     }
 }
 
+/**
+ * Replaces the fragment in the specified container view.
+ * @param fragment The fragment to display.
+ * @param frameId The ID of the container view.
+ * @param addToBackStack Whether to add the transaction to the back stack.
+ */
+fun AppCompatActivity.replaceFragment(fragment: Fragment, @IdRes frameId: Int, addToBackStack: Boolean = false) {
+    supportFragmentManager.beginTransaction().apply {
+        replace(frameId, fragment)
+        if (addToBackStack) addToBackStack(null)
+        commit()
+    }
+}
+
+/**
+ * Adds the fragment to the specified container view.
+ * @param fragment The fragment to add.
+ * @param frameId The ID of the container view.
+ * @param addToBackStack Whether to add the transaction to the back stack.
+ */
+fun AppCompatActivity.addFragment(fragment: Fragment, @IdRes frameId: Int, addToBackStack: Boolean = false) {
+    supportFragmentManager.beginTransaction().apply {
+        add(frameId, fragment)
+        if (addToBackStack) addToBackStack(null)
+        commit()
+    }
+}
+
+@Deprecated("Use addFragment instead",
+    ReplaceWith("addFragment")
+)
 /**
  * The `fragment` is added to the container view with tag. The operation is
  * performed by the `fragmentManager`.
@@ -224,17 +253,15 @@ fun Activity.getContentView(): ViewGroup {
     return this.findViewById(android.R.id.content) as ViewGroup
 }
 
-fun Activity.checkPermissionRationale(
-    permission: String
-): Boolean {
+/**
+ * Checks whether a permission rationale should be displayed.
+ * @param permission The permission to check.
+ * @return True if a rationale should be displayed, false otherwise.
+ */
+fun Activity.checkPermissionRationale(permission: String): Boolean {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        val shouldShowRequestPermissionRationale = shouldShowRequestPermissionRationale(permission)
-        Log.d("PermissionLogs", "checkPermissionRationale: $shouldShowRequestPermissionRationale")
-        shouldShowRequestPermissionRationale
-    } else {
-        Log.d("PermissionLogs", "checkPermissionRationaleElse: false")
-        false
-    }
+        shouldShowRequestPermissionRationale(permission)
+    } else false
 }
 
 /** Directly call launch from activity for Coroutine Default
@@ -269,4 +296,22 @@ fun Activity.finishToDown() {
 fun Activity.finishAffinityToDown() {
     this.finishAffinity()
     this.overridePendingTransition(0, R.anim.slide_out_down)
+}
+
+
+/**
+ * Retrieves an intent extra of the specified type.
+ * @param key The key for the intent extra.
+ * @param defaultValue The default value if the extra is not found.
+ * @return The value of the extra, or the default value.
+ */
+inline fun <reified T> Activity.getIntentExtra(key: String, defaultValue: T): T {
+    return when (T::class) {
+        Boolean::class -> intent?.getBooleanExtra(key, defaultValue as Boolean) as T
+        Int::class -> intent?.getIntExtra(key, defaultValue as Int) as T
+        String::class -> intent?.getStringExtra(key) as T ?: defaultValue
+        Float::class -> intent?.getFloatExtra(key, defaultValue as Float) as T
+        Long::class -> intent?.getLongExtra(key, defaultValue as Long) as T
+        else -> defaultValue
+    }
 }

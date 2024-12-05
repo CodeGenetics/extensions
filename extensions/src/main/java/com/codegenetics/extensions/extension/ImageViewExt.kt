@@ -1,6 +1,7 @@
 package com.codegenetics.extensions.extension
 
 import android.animation.ObjectAnimator
+import android.content.Context
 import android.view.animation.LinearInterpolator
 import android.widget.ImageView
 import androidx.annotation.ColorRes
@@ -31,4 +32,10 @@ fun ImageView.rotate() {
     animator.repeatCount = ObjectAnimator.INFINITE
     animator.interpolator = LinearInterpolator()
     animator.start()
+}
+
+fun ImageView.loadImage(url: String, placeholder: Int? = null) {
+    val request = Glide.with(this).load(url)
+    placeholder?.let { request.placeholder(it) }
+    request.into(this)
 }
