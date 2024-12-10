@@ -113,10 +113,33 @@ fun Activity.isSystemThemeDark(): Boolean {
  * Retrieves the height of the navigation bar, if it is visible.
  * @return The height of the navigation bar in pixels, or 0 if not visible.
  */
-@RequiresApi(Build.VERSION_CODES.M)
 fun Activity.getNavHeight(): Int {
-    val insets = WindowInsetsCompat.toWindowInsetsCompat(window.decorView.rootWindowInsets)
-    return insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+    val decorView = this.window.decorView
+    var h = 0
+
+    val isNavigationBarShowing = decorView.height != this.windowManager.defaultDisplay.height
+
+    if (!isNavigationBarShowing) {
+        return 0
+    }
+
+    val resourceId = this.resources.getIdentifier("navigation_bar_height", "dimen", "android")
+    if (resourceId > 0) {
+        h = this.resources.getDimensionPixelSize(resourceId)
+    } else {
+        decorView.viewTreeObserver.addOnGlobalLayoutListener(object :
+            ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                decorView.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                val height = decorView.height
+                val displayMetrics = DisplayMetrics()
+                this@getNavHeight.windowManager.defaultDisplay.getMetrics(displayMetrics)
+                val screenHeight = displayMetrics.heightPixels
+                h = screenHeight - height
+            }
+        })
+    }
+    return h
 }
 
 

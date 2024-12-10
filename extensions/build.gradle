@@ -5,8 +5,8 @@ plugins {
 }
 
 ext{
-    versionCode = 36
-    versionName = "2.1.6"
+    versionCode = 37
+    versionName = "2.1.7"
 }
 
 android {
