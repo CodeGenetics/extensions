@@ -5,8 +5,8 @@ plugins {
 }
 
 ext{
-    versionCode = 38
-    versionName = "2.1.8"
+    versionCode = 39
+    versionName = "2.1.9"
 }
 
 android {
@@ -64,6 +64,8 @@ dependencies {
 //    api 'androidx.lifecycle:lifecycle-process-ktx:2.4.0'
     implementation 'androidx.databinding:library:3.2.0-alpha11'
     implementation 'com.google.android.gms:play-services-ads-identifier:18.1.0'
+    testImplementation 'junit:junit:4.12'
+    testImplementation 'org.robolectric:robolectric:4.9.2'
 }
 
 afterEvaluate {

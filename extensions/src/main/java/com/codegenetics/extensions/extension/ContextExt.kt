@@ -1128,6 +1128,21 @@ fun Context.getScreenSizeInDp(): Pair<Int, Int> {
     return Pair(widthDp.toInt(), heightDp.toInt())
 }
 
+fun Context.isAppInForeground(): Boolean {
+    val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val appProcesses = activityManager.runningAppProcesses ?: return false
+    val packageName = applicationContext.packageName
+    return appProcesses.any {
+        it.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND && it.processName == packageName
+    }
+}
+
+fun Context.startServicePlease(serviceIntent: Intent) {
+    if (isAppInForeground()) {
+        startService(serviceIntent)
+    }
+}
+
 inline fun <reified T : Activity> Context.openActivityWithAnimation(
     intentBody: Intent.() -> Unit
 ) {
@@ -1188,4 +1203,6 @@ fun Context.getColor(@ColorRes id: Int) = ContextCompat.getColor(this, id)
  */
 @Deprecated("Use getDrawableResource", ReplaceWith("getDrawableResource"))
 fun Context.getDrawable(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
+
+
 
