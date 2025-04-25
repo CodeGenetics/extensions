@@ -1,9 +1,12 @@
 package com.codegenetics.extensions.extension
 
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.Typeface
+import android.os.CountDownTimer
 import android.text.Spannable
+import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.util.Base64
 import android.util.Log
@@ -343,4 +346,108 @@ fun String.decryptAES(key: String): String {
 private fun generateKey(key: String): Key {
     val keyBytes = key.toByteArray(Charsets.UTF_8)
     return SecretKeySpec(keyBytes.copyOf(16), AES)
+}
+
+/**
+ * Extension function for TextView that colorizes the text based on character type.
+ *
+ * This function iterates through each character in the TextView's text and applies a color span
+ * based on the following rules:
+ * - **Uppercase letters:** Red
+ * - **Lowercase letters:** Blue
+ * - **Digits:** Green
+ * - **Special characters:** Magenta
+ *
+ * The function uses [SpannableString] to apply [ForegroundColorSpan] to individual characters.
+ * [Spannable.SPAN_EXCLUSIVE_EXCLUSIVE] flag ensures that new characters added at the start and end
+ * of the text will not be included in the previous span.
+ *
+ * Example usage:
+ * ```kotlin
+ * val myTextView: TextView = findViewById(R.id.myTextView)
+ * myTextView.text = "Hello World 123!"
+ * myTextView.colorizeText()
+ * ```
+ * After calling `colorizeText()`, the `myTextView` will display:
+ * - "H" and "W" in red.
+ * - "ello" and "orld" in blue.
+ * - "1", "2", and "3" in green.
+ * - " " and "!" in magenta.
+ *
+ * @receiver TextView The TextView to apply the colorization to.
+ */
+fun TextView.colorizeText() {
+    val spannable = SpannableString(text)
+    text.forEachIndexed { index, char ->
+        val color = when {
+            char.isUpperCase() -> Color.RED          // Capital letters → Red
+            char.isLowerCase() -> Color.BLUE         // Lowercase letters → Blue
+            char.isDigit() -> Color.GREEN            // Digits → Green
+            else -> Color.MAGENTA                    // Special characters → Magenta
+        }
+        spannable.setSpan(
+            ForegroundColorSpan(color),
+            index, index + 1,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+    }
+    this.text= spannable
+}
+
+/**
+ * Starts a countdown timer and displays the remaining time in the specified TextView.
+ *
+ * This function extends the TextView class, allowing you to easily start a countdown
+ * timer directly on a TextView instance. The timer will update the text of the TextView
+ * every second, showing the remaining time in "minutes:seconds" format.
+ *
+ * @param startTimeInSeconds The total duration of the countdown in seconds.
+ * @param prefix An optional string to be displayed before the time in the TextView. Defaults to an empty string.
+ * @param onFinish An optional lambda function that will be invoked when the countdown finishes. Defaults to null.
+ * @return A CountDownTimer instance. This can be used to cancel the timer if needed.
+ *
+ * Example Usage:
+ *
+ * ```kotlin
+ * val myTextView = findViewById<TextView>(R.id.my_text_view)
+ * val timer = myTextView.startCountdown(60, "Time Left: ") {
+ *     // This code will be executed when the timer finishes.
+ *     Toast.makeText(this, "Countdown finished!", Toast.LENGTH_SHORT).show()
+ * }
+ *
+ * // To cancel the timer before it finishes:
+ * timer.cancel()
+ * ```
+ *
+ * Notes:
+ *
+ * - The `startTimeInSeconds` should be a positive integer value.
+ * - The countdown display will format the time as "minutes:seconds".
+ * - When the timer reaches zero, the TextView will display "$prefix 0:00".
+ * - The `onFinish` callback is executed on the main thread.
+ * - Make sure to cancel the timer when the activity or fragment is destroyed if you no longer need it.
+ */
+fun TextView.startCountdown(
+    startTimeInSeconds: Long,
+    prefix: String = "",
+    onFinish: (() -> Unit)? = null
+): CountDownTimer {
+    this.text = String.format("%d:%02d", startTimeInSeconds / 60, startTimeInSeconds % 60)
+
+    val timer = object : CountDownTimer(startTimeInSeconds * 1000, 1000) {
+        override fun onTick(millisUntilFinished: Long) {
+            val secondsRemaining = (millisUntilFinished / 1000).toInt()
+            val minutes = secondsRemaining / 60
+            val seconds = secondsRemaining % 60
+            this@startCountdown.text = "$prefix $minutes:$seconds"
+//            this@startCountdown.text = String.format("%d:%02d", minutes, seconds)
+        }
+
+        override fun onFinish() {
+            this@startCountdown.text = "$prefix 0:00"
+            onFinish?.invoke()
+        }
+    }
+    timer.start()
+    return timer
 }

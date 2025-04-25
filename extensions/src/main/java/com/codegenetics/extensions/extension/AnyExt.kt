@@ -16,10 +16,15 @@ import androidx.fragment.app.FragmentTransaction
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.SimpleTarget
 import com.bumptech.glide.request.transition.Transition
+import com.google.gson.Gson
+import java.io.File
 import java.math.RoundingMode
 import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.text.NumberFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 fun Any.twoDecimal(): String {
     val df = DecimalFormat("0.00")
@@ -201,4 +206,54 @@ fun Date.toMillis() : Long {
     val calendar = Calendar.getInstance()
     calendar.time = this
     return calendar.timeInMillis
+}
+
+fun Any.toLocalizedNumber(): String {
+    // Get the current locale
+    val currentLocale = Locale.getDefault()
+    // Create a NumberFormat instance for the current locale
+    val numberFormat = NumberFormat.getInstance(currentLocale)
+    // Format the integer and return the result
+    return numberFormat.format(this)
+}
+
+/**
+ * Converts any object to its JSON string representation.
+ *
+ * This extension function utilizes the Gson library to serialize the object.
+ * It can handle a wide variety of object types, including primitives,
+ * collections, and custom classes, as long as they are serializable by Gson.
+ *
+ * @receiver Any The object to be converted to JSON.
+ * @return String The JSON string representation of the object.
+ * @throws JsonIOException If there was a problem writing to the output or converting the object.
+ * @throws JsonSyntaxException If the resulting JSON was not valid.
+ * @throws OutOfMemoryError if the output string cannot fit into available memory.
+ * @throws StackOverflowError if the depth of object to be converted is too big.
+ * @see com.google.gson.Gson
+ * @see com.google.gson.Gson.toJson
+ */
+fun Any.toJson(): String? {
+    return try {
+        Gson().toJson(this)
+    } catch (e: Exception) {
+        null
+    }
+}
+
+fun File.size(): String {
+    val byteCount = this.length()
+    val byteFormatter = DecimalFormat("###.##")
+    byteFormatter.decimalFormatSymbols = DecimalFormatSymbols().apply {
+        groupingSeparator = '.'
+    }
+    val kbSize = byteCount / 1024.0
+    val mbSize = kbSize / 1024.0
+    val gbSize = mbSize / 1024.0
+    return when {
+        gbSize >= 1.0 -> "${byteFormatter.format(gbSize)} GB"
+        mbSize >= 1.0 -> "${byteFormatter.format(mbSize)} MB"
+        kbSize >= 1.0 -> "${byteFormatter.format(kbSize)} KB"
+        else -> "${byteFormatter.format(byteCount)} bytes"
+    }
 }

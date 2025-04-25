@@ -2,16 +2,55 @@ package com.codegenetics.extensions.extension
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.*
+import android.app.Activity
+import android.app.ActivityManager
+import android.app.AlarmManager
+import android.app.AppOpsManager
+import android.app.KeyguardManager
+import android.app.Notification
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
+import android.app.UiModeManager
 import android.app.admin.DevicePolicyManager
 import android.app.job.JobScheduler
 import android.bluetooth.BluetoothManager
 import android.content.ActivityNotFoundException
+import android.content.ClipData
 import android.content.ClipboardManager
+import android.content.ComponentName
 import android.content.Context
-import android.content.Context.*
+import android.content.Context.ACTIVITY_SERVICE
+import android.content.Context.ALARM_SERVICE
+import android.content.Context.APP_OPS_SERVICE
+import android.content.Context.BLUETOOTH_SERVICE
+import android.content.Context.CLIPBOARD_SERVICE
+import android.content.Context.CONNECTIVITY_SERVICE
+import android.content.Context.DEVICE_POLICY_SERVICE
+import android.content.Context.INPUT_METHOD_SERVICE
+import android.content.Context.JOB_SCHEDULER_SERVICE
+import android.content.Context.KEYGUARD_SERVICE
+import android.content.Context.LAYOUT_INFLATER_SERVICE
+import android.content.Context.LOCATION_SERVICE
+import android.content.Context.NOTIFICATION_SERVICE
+import android.content.Context.TELEPHONY_SERVICE
 import android.content.Intent
-import android.content.Intent.*
+import android.content.Intent.ACTION_CALL
+import android.content.Intent.ACTION_DIAL
+import android.content.Intent.ACTION_MAIN
+import android.content.Intent.ACTION_SEND
+import android.content.Intent.ACTION_SENDTO
+import android.content.Intent.ACTION_VIEW
+import android.content.Intent.CATEGORY_APP_EMAIL
+import android.content.Intent.CATEGORY_BROWSABLE
+import android.content.Intent.CATEGORY_DEFAULT
+import android.content.Intent.EXTRA_EMAIL
+import android.content.Intent.EXTRA_STREAM
+import android.content.Intent.EXTRA_SUBJECT
+import android.content.Intent.EXTRA_TEXT
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
+import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+import android.content.Intent.createChooser
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -21,22 +60,36 @@ import android.location.LocationManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
-import android.os.*
+import android.os.Build
+import android.os.Bundle
+import android.os.Parcelable
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
+import android.util.Log
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import android.widget.Toast
-import androidx.annotation.*
+import androidx.annotation.AttrRes
+import androidx.annotation.BoolRes
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import androidx.annotation.IntegerRes
+import androidx.annotation.LayoutRes
+import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
+import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.net.toUri
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -61,7 +114,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
-import java.util.*
 
 fun Context.getScreenWidth(percent: Double): Int {
     return (this.resources.displayMetrics.widthPixels * (percent / 100)).toInt()
@@ -1186,6 +1238,127 @@ fun Context.printAdvertisingId() {
     }
 }
 
+fun Context.openHotspotSettings() {
+    try {
+        val intent = Intent(Intent.ACTION_MAIN, null)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        val cn = ComponentName("com.android.settings", "com.android.settings.TetherSettings")
+        intent.setComponent(cn)
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
+    } catch (_: ActivityNotFoundException) {
+    }
+}
+
+
+/**
+ * Copies arbitrary text to the clipboard.
+ *
+ * @param text        The text to copy.
+ * @param label       The clipboard label (default: “Copied Text”).
+ * @param showToast   Whether to show a Toast on success/failure.
+ * @return            True if the copy succeeded, false otherwise.
+ */
+fun Context.copyToClipboard(
+    text: String,
+    label: String = "Copied Text",
+    showToast: Boolean = true
+): Boolean {
+    if (text.isBlank()) {
+        if (showToast) Toast.makeText(this, "Nothing to copy", Toast.LENGTH_SHORT).show()
+        return false
+    }
+
+    val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+    if (clipboard == null) {
+        if (showToast) Toast.makeText(this, "Clipboard unavailable", Toast.LENGTH_SHORT).show()
+        return false
+    }
+
+    val clip = ClipData.newPlainText(label, text)
+    clipboard.setPrimaryClip(clip)
+    if (showToast) toast("Text copied to clipboard")
+    return true
+}
+
+
+/**
+ * Copies this TextView’s text to the clipboard, with guards & a Toast confirmation.
+ *
+ * @param label  The clipboard label (default “Copied Text”).
+ */
+fun TextView.copyToClipboard(label: String = "Copied Text", showToast: Boolean) {
+    val textToCopy = this.text.toString()
+    if (textToCopy.isBlank()) {
+        Toast.makeText(context, "Nothing to copy", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    // Standard service lookup + safe cast
+    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+    if (clipboard == null) {
+        Toast.makeText(context, "Clipboard unavailable", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    // Create clip and copy
+    val clip = ClipData.newPlainText(label, textToCopy)
+    clipboard.setPrimaryClip(clip)
+    if (showToast)
+        Toast.makeText(context, "Text copied to clipboard", Toast.LENGTH_SHORT).show()
+}
+
+fun Context.openSystemUpdatePage() {
+    try {
+        val intent = Intent("android.settings.SYSTEM_UPDATE_SETTINGS")
+        startActivity(intent)
+    } catch (e: SecurityException) {
+        e.printStackTrace()
+        // Log a more detailed message for better debugging
+        Log.e("SystemUpdate", "Permission error while opening system update page: ${e.message}")
+
+        // Fallback to general settings page if update settings cannot be accessed
+        val fallbackIntent = Intent(Settings.ACTION_SETTINGS)
+        startActivity(fallbackIntent)
+    } catch (e: Exception) {
+        e.printStackTrace()
+        // Log a more general exception message
+        Log.e("SystemUpdate", "Unexpected error: ${e.message}")
+
+        // Fallback to general settings page
+        val fallbackIntent = Intent(Settings.ACTION_SETTINGS)
+        startActivity(fallbackIntent)
+    }
+}
+
+
+fun Context.getIcon(packageName: String): Drawable? {
+    return try {
+        this.packageManager.getApplicationIcon(packageName)
+    } catch (e: PackageManager.NameNotFoundException) {
+       null
+    }
+}
+
+fun Context.launchApp(packageName: String) {
+    val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+    if (launchIntent != null) {
+        startActivity(launchIntent)
+    }
+    else{
+        "App Not Found"
+    }
+}
+
+fun Context.uninstallApp(packageName: String) {
+    val uninstallIntent = Intent(Intent.ACTION_DELETE).apply {
+        data = Uri.fromParts("package", packageName, null)
+    }
+    startActivity(uninstallIntent)
+
+}
+
+
 /*************************************************************
  *******************DEPRECATED METHODS************************
  *************************************************************/
@@ -1201,8 +1374,11 @@ fun Context.getColor(@ColorRes id: Int) = ContextCompat.getColor(this, id)
 /**
  * Extension method to Get Drawable for resource for Context.
  */
+
 @Deprecated("Use getDrawableResource", ReplaceWith("getDrawableResource"))
 fun Context.getDrawable(@DrawableRes id: Int) = ContextCompat.getDrawable(this, id)
+
+
 
 
 

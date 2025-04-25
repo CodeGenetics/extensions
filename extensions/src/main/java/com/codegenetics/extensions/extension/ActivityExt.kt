@@ -1,9 +1,13 @@
 package com.codegenetics.extensions.extension
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AppOpsManager
 import android.content.Context
+import android.content.Context.APP_OPS_SERVICE
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -22,6 +26,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
@@ -336,5 +341,72 @@ inline fun <reified T> Activity.getIntentExtra(key: String, defaultValue: T): T 
         Float::class -> intent?.getFloatExtra(key, defaultValue as Float) as T
         Long::class -> intent?.getLongExtra(key, defaultValue as Long) as T
         else -> defaultValue
+    }
+}
+
+/**
+ * Checks if the app has permission to access usage statistics.
+ *
+ * This function determines whether the application has been granted the
+ * `android.permission.PACKAGE_USAGE_STATS` permission, which is required to
+ * query detailed information about app usage.
+ *
+ * The function internally uses the `AppOpsManager` to check the status of the
+ * `AppOpsManager.OPSTR_GET_USAGE_STATS` operation for the current application.
+ *
+ * @return `true` if the app has usage access permission (MODE_ALLOWED), `false` otherwise.
+ *
+ * @see AppOpsManager
+ * @see AppOpsManager.OPSTR_GET_USAGE_STATS
+ * @see AppOpsManager.MODE_ALLOWED
+ * @see android.permission.PACKAGE_USAGE_STATS
+ */
+fun Activity.hasUsagePermission(): Boolean {
+    val appops = getSystemService(APP_OPS_SERVICE) as AppOpsManager
+    val mode = appops.checkOpNoThrow(
+        AppOpsManager.OPSTR_GET_USAGE_STATS,
+        android.os.Process.myUid(),
+        packageName ?: ""
+    )
+    return mode == AppOpsManager.MODE_ALLOWED
+}
+
+/**
+ * Checks if the app has the necessary storage permissions.
+ *
+ * This function determines whether the application has been granted the required storage
+ * permissions based on the Android version.
+ *
+ * On Android 13 (Tiramisu) and above, it checks for the presence of
+ * `READ_MEDIA_IMAGES`, `READ_MEDIA_VIDEO`, and `READ_MEDIA_AUDIO` permissions.
+ *
+ * On older Android versions, it checks for the `WRITE_EXTERNAL_STORAGE` permission, which
+ * implies read access as well.
+ *
+ * @return `true` if all the required storage permissions are granted, `false` otherwise.
+ *
+ * @receiver Activity The activity instance calling this function.
+ *
+ * @since API Level 1
+ */
+fun Activity.hasStoragePermissions(): Boolean {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        return !(ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.READ_MEDIA_IMAGES
+        ) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_MEDIA_VIDEO
+                ) != PackageManager.PERMISSION_GRANTED ||
+                ActivityCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.READ_MEDIA_AUDIO
+                ) != PackageManager.PERMISSION_GRANTED)
+    } else {
+        return ActivityCompat.checkSelfPermission(
+            this,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
     }
 }

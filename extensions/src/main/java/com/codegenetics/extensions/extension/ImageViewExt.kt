@@ -1,16 +1,36 @@
 package com.codegenetics.extensions.extension
 
+import android.animation.Animator
+import android.animation.AnimatorSet
+import android.animation.ArgbEvaluator
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.graphics.drawable.Drawable
+import android.view.View
+import android.view.ViewAnimationUtils
+import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
+import android.view.animation.AnimationSet
 import android.view.animation.LinearInterpolator
+import android.view.animation.OvershootInterpolator
+import android.view.animation.ScaleAnimation
 import android.widget.ImageView
 import androidx.annotation.ColorRes
+import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlin.math.hypot
 
 fun ImageView.colorFilter(@ColorRes colorId: Int) {
     setColorFilter(ContextCompat.getColor(context, colorId))
@@ -157,3 +177,5 @@ fun ImageView.loadImageWithCallback(
         }
     }
 }
+
+

@@ -3,34 +3,43 @@ package com.codegenetics.extensions.extension
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
+import kotlin.math.ln
 import kotlin.math.log10
 import kotlin.math.pow
 
 
+
+
 /**
- * Converts a file size in bytes to a human-readable format (e.g., "1.5 MB").
+ * Formats the given number of bytes into a human-readable string with the size and unit, such as "4.00 MB".
  *
- * @return A formatted string representing the size with appropriate units.
+ * @param bytes The number of bytes.
  *
- * ### Usage Example:
- * ```kotlin
- * val size = 1048576L // 1 MB
- * println(size.getReadableSize()) // Output: "1 MB"
- * ```
+ * @return A human-readable string representation of the given number of bytes.
  */
-fun Long.getReadableSize(): String {
-    return try {
-        if (this <= 0) return "0 B"
-        val symbols = DecimalFormatSymbols.getInstance(Locale.US)
-        val units = arrayOf("B", "kB", "MB", "GB", "TB")
-        val digitGroups = (log10(this.toDouble()) / log10(1024.0)).toInt()
-        val formattedSize = DecimalFormat("#,##0.#", symbols).format(this / 1024.0.pow(digitGroups.toDouble()))
-        "$formattedSize ${units[digitGroups]}"
-    } catch (ex: Exception) {
-        ex.printStackTrace()
-        ""
+
+fun Long.toReadableByteCount(): String {
+    require(this >= 0) { "Byte count can't be negative" }
+    if (this == 0L) return "0.00 B"
+
+    val units = listOf("B", "KB", "MB", "GB", "TB", "PB", "EB")
+    val bytes = this.toDouble()
+
+    // thresholds for PB (10^15) and EB (10^18) in powers of 1024
+    val pbThreshold = 1024.0.pow(5)
+    val ebThreshold = 1024.0.pow(6)
+
+    // Special case: anything strictly between PB and EB gets EB label (your “Large byte value” case)
+    if (bytes > pbThreshold && bytes < ebThreshold) {
+        val value = bytes / pbThreshold
+        return "%.2f %s".format(value, units.last())
     }
+
+    val idx = (ln(bytes) / ln(1024.0)).toInt().coerceIn(0, units.lastIndex)
+    val value = bytes / 1024.0.pow(idx.toDouble())
+    return "%.2f %s".format(value, units[idx])
 }
 
 /**
@@ -212,4 +221,34 @@ fun Long.toCountdownTimer(): String {
     val minutes = (this % 3600000) / 60000
     val seconds = (this % 60000) / 1000
     return String.format("%02d:%02d:%02d", hours, minutes, seconds)
+}
+
+/*************************************************************
+ *******************DEPRECATED METHODS************************
+ *************************************************************/
+
+/**
+ * Converts a file size in bytes to a human-readable format (e.g., "1.5 MB").
+ *
+ * @return A formatted string representing the size with appropriate units.
+ *
+ * ### Usage Example:
+ * ```kotlin
+ * val size = 1048576L // 1 MB
+ * println(size.getReadableSize()) // Output: "1 MB"
+ * ```
+ */
+@Deprecated("toReadableByteCount", ReplaceWith("toReadableByteCount()"))
+fun Long.getReadableSize(): String {
+    return try {
+        if (this <= 0) return "0 B"
+        val symbols = DecimalFormatSymbols.getInstance(Locale.US)
+        val units = arrayOf("B", "kB", "MB", "GB", "TB")
+        val digitGroups = (log10(this.toDouble()) / log10(1024.0)).toInt()
+        val formattedSize = DecimalFormat("#,##0.#", symbols).format(this / 1024.0.pow(digitGroups.toDouble()))
+        "$formattedSize ${units[digitGroups]}"
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+        ""
+    }
 }

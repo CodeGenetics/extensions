@@ -1,5 +1,6 @@
 package com.codegenetics.extensions.extension
 
+import android.content.Context
 import android.graphics.Color
 import androidx.core.text.HtmlCompat
 import com.google.gson.Gson
@@ -989,5 +990,19 @@ fun String.parseDouble(): Double {
         return 0.0
     }
 }
+
+/**
+ * Copies this string to the clipboard via the given Context.
+ *
+ * @param context   Where to get the clipboard from.
+ * @param label     The clipboard label (default: “Copied Text”).
+ * @param showToast Whether to show a Toast (default: true).
+ * @return          True if the copy succeeded.
+ */
+fun String.copyToClipboard(
+    context: Context,
+    label: String = "Copied Text",
+    showToast: Boolean = true
+): Boolean = context.copyToClipboard(this, label, showToast)
 
 
