@@ -12,16 +12,15 @@ import android.util.Base64
 import android.util.Log
 import android.widget.TextView
 import androidx.annotation.ColorRes
-import androidx.annotation.DrawableRes
-import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
+import com.codegenetics.extensions.utils.ThickerStrikethroughSpan
+import java.security.Key
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
-import javax.crypto.Cipher
-import javax.crypto.spec.SecretKeySpec
-import java.security.Key
 import java.security.SecureRandom
+import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 /**
  * Tints the compound drawables of a TextView with the specified color resource.
@@ -70,6 +69,19 @@ fun TextView.underLine() {
 }
 
 /**
+ * Removes the underline from the text of this TextView.
+ *
+ * This function modifies the paint flags of the TextView to remove the
+ * `Paint.UNDERLINE_TEXT_FLAG`. After changing the flags, it calls `invalidate()`
+ * to force a redraw of the view, ensuring the underline is visually removed.
+ */
+fun TextView.removeUnderline() {
+    paint.flags = paint.flags and Paint.UNDERLINE_TEXT_FLAG.inv()
+    invalidate()
+}
+
+
+/**
  * Adds a strikethrough effect to the TextView text.
  *
  * ### Usage Example:
@@ -83,6 +95,65 @@ fun TextView.strikethrough() {
 }
 
 /**
+ * Removes the strikethrough effect from the TextView.
+ *
+ * This function modifies the paint flags of the TextView to clear the
+ * STRIKE_THRU_TEXT_FLAG, effectively removing any strikethrough line
+ * that was previously applied. It then calls `invalidate()` to trigger
+ * a redraw of the TextView, ensuring the change is visually reflected.
+ */
+fun TextView.removeStrikethrough() {
+    paint.flags = paint.flags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+    invalidate()
+}
+
+/**
+ * Applies a strikethrough effect to a specified substring within the TextView.
+ *
+ * This extension function allows for customizing the thickness of the strikethrough line.
+ * If the specified substring is not found in the TextView's text, no action is taken.
+ *
+ * @receiver The TextView to which the strikethrough will be applied.
+ * @param substring The specific portion of the text to strike through.
+ *                  Defaults to the entire text of the TextView.
+ * @param thickness The desired thickness of the strikethrough line in pixels.
+ *                  Defaults to 2f.
+ */
+fun TextView.strikeThroughCustom(
+    substring: String = this.text.toString(),
+    thickness: Float = 2f
+) {
+    val start = text.indexOf(substring)
+    if (start >= 0) {
+        val spannable = SpannableString(text)
+        spannable.setSpan(
+            ThickerStrikethroughSpan(thickness),
+            start,
+            start + substring.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+        text = spannable
+    }
+}
+
+/**
+ * Removes any custom thicker strikethrough spans from the TextView's text.
+ *
+ * This function iterates through all `ThickerStrikethroughSpan` instances
+ * applied to the `TextView`'s text and removes them.
+ *
+ * If the `TextView`'s text is not a `Spannable` (meaning it doesn't support spans),
+ * this function will do nothing.
+ */
+fun TextView.removeStrikeThroughCustom() {
+    val spannable = text as? Spannable ?: return
+    val spans = spannable.getSpans(0, spannable.length, ThickerStrikethroughSpan::class.java)
+    for (span in spans) {
+        spannable.removeSpan(span)
+    }
+    text = spannable
+}
+/**
  * Makes the TextView text bold.
  *
  * ### Usage Example:
@@ -94,6 +165,132 @@ fun TextView.bold() {
     paint.isFakeBoldText = true
     paint.isAntiAlias = true
 }
+
+/**
+ * Removes the bold formatting from the TextView.
+ *
+ * This function sets the `isFakeBoldText` property of the TextView's Paint object to `false`,
+ * effectively turning off any simulated bold effect that might have been applied.
+ * It then calls `invalidate()` to trigger a redraw of the TextView, ensuring the change
+ * in text appearance is immediately visible.
+ *
+ * This is particularly useful for undoing a bold effect that was programmatically
+ * applied using `paint.isFakeBoldText = true`.
+ */
+fun TextView.removeBold() {
+    paint.isFakeBoldText = false
+    invalidate()
+}
+
+/**
+ * Sets the text style of the TextView to italic.
+ *
+ * This function modifies the TextView's typeface to display its text in an italic style.
+ * It also enables anti-aliasing for smoother text rendering.
+ *
+ * @receiver The TextView on which to apply the italic style.
+ */
+fun TextView.italic() {
+    setTypeface(typeface, Typeface.ITALIC)
+    paint.isAntiAlias = true
+}
+
+/**
+ * Removes the italic style from the TextView.
+ *
+ * This function sets the typeface of the TextView to `Typeface.NORMAL`,
+ * which effectively removes any italic styling that might have been applied.
+ * It then calls `invalidate()` to ensure the TextView is redrawn with the updated style.
+ */
+fun TextView.removeItalic() {
+    setTypeface(null, Typeface.NORMAL)
+    invalidate()
+}
+
+/**
+ * Sets the typeface of the TextView to bold and italic.
+ *
+ * This function modifies the TextView's typeface to display text in a bold and italic style.
+ * It also enables anti-aliasing for smoother text rendering.
+ *
+ * Example usage:
+ * ```kotlin
+ * myTextView.boldItalic()
+ * ```
+ */
+fun TextView.boldItalic() {
+    setTypeface(typeface, Typeface.BOLD_ITALIC)
+    paint.isAntiAlias = true
+}
+
+/**
+ * Resets all text styles applied to the TextView.
+ *
+ * This function clears any existing paint flags (like underline, strikethrough),
+ * removes fake bolding, and sets the typeface back to the default normal style.
+ * It then invalidates the view to ensure the changes are redrawn.
+ *
+ * This is useful for clearing any programmatically or XML-defined text styling
+ * and starting fresh.
+ */
+fun TextView.resetTextStyles() {
+    paint.flags = 0
+    paint.isFakeBoldText = false
+    setTypeface(null, Typeface.NORMAL)
+    invalidate()
+}
+
+
+/**
+ * Applies a header style to the TextView.
+ *
+ * This function modifies the TextView's appearance to resemble a header by:
+ * - Setting the text color to the specified color resource.
+ * - Making the text bold.
+ * - Setting the text size to 20sp.
+ *
+ * @param colorId The resource ID of the color to use for the text.
+ *                This should be a color resource (e.g., `R.color.my_header_color`).
+ */
+fun TextView.headerStyle(@ColorRes colorId: Int) {
+    textColor(colorId)
+    bold()
+    textSize = 20f
+}
+
+/**
+ * Applies a caption-style to the TextView.
+ *
+ * This includes setting the text color, making the text italic, and setting the text size to 12f.
+ *
+ * @param colorId The resource ID of the color to use for the text.
+ */
+fun TextView.captionStyle(@ColorRes colorId: Int) {
+    textColor(colorId)
+    italic()
+    textSize = 12f
+}
+
+/**
+ * Applies a standardized button style to a TextView.
+ *
+ * This function modifies the TextView's appearance to resemble a button by:
+ * - Setting the text color using the provided color resource.
+ * - Making the text bold.
+ * - Setting the text size to 16sp.
+ * - Converting all text to uppercase.
+ *
+ * @param colorId The resource ID of the color to be used for the text.
+ *                Example: `R.color.my_button_color`
+ */
+fun TextView.buttonStyle(@ColorRes colorId: Int) {
+    textColor(colorId)
+    bold()
+    textSize = 16f
+    isAllCaps = true
+}
+
+
 /**
  * Changes the color of a specific substring within the TextView text.
  *
@@ -107,19 +304,26 @@ fun TextView.bold() {
  */
 fun TextView.setColorOfSubstring(substring: String, color: Int) {
     try {
-        val spannable = android.text.SpannableString(text)
-        val start = text.indexOf(substring)
-        spannable.setSpan(
-            ForegroundColorSpan(ContextCompat.getColor(context, color)),
-            start,
-            start + substring.length,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        text = spannable
+        try {
+            val spannable = SpannableString(text)
+            val start = text.indexOf(substring)
+            if (start >= 0) {
+                spannable.setSpan(
+                    ForegroundColorSpan(ContextCompat.getColor(context, color)),
+                    start,
+                    start + substring.length,
+                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                text = spannable
+            }
+        } catch (e: Exception) {
+            Log.d("ViewExtensions", "Exception in setColorOfSubstring: $e")
+        }
     } catch (e: Exception) {
         Log.d("ViewExtensions", "Exception in setColorOfSubstring: $e")
     }
 }
+
 
 /**
  * Sets a custom font for the TextView.
